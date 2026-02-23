@@ -7,24 +7,7 @@ function Library:CreateWindow(hubName)
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "BacBeoDashboard"
 
-    -- 1. Khung Main chính
-    local MainFrame = Instance.new("Frame", ScreenGui)
-    MainFrame.Size = UDim2.new(0, 400, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    MainFrame.BorderSizePixel = 0
-    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
-
-    -- 2. Tiêu đề
-    local Title = Instance.new("TextLabel", MainFrame)
-    Title.Size = UDim2.new(1, 0, 0, 40)
-    Title.Text = hubName
-    Title.TextColor3 = Color3.fromRGB(0, 255, 0)
-    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Title.Font = Enum.Font.Code
-    Title.TextSize = 18
-    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 10)
-
+    
     -- 3. Khung chứa nút (QUAN TRỌNG: Phải có cái này nút mới hiện)
     local Container = Instance.new("ScrollingFrame", MainFrame)
     Container.Size = UDim2.new(1, -20, 1, -60)
@@ -57,63 +40,5 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- BẢNG STATS GÓC PHẢI
-    local StatsFrame = Instance.new("Frame", ScreenGui)
-    StatsFrame.Size = UDim2.new(0, 180, 0, 70)
-    StatsFrame.Position = UDim2.new(1, -190, 0, 10)
-    StatsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    StatsFrame.BackgroundTransparency = 0.5
-    Instance.new("UICorner", StatsFrame)
-
-    local StatsText = Instance.new("TextLabel", StatsFrame)
-    StatsText.Size = UDim2.new(1, -10, 1, -10)
-    StatsText.Position = UDim2.new(0, 5, 0, 5)
-    StatsText.Font = Enum.Font.Code
-    StatsText.TextColor3 = Color3.fromRGB(0, 255, 0)
-    StatsText.TextSize = 14
-    StatsText.BackgroundTransparency = 1
-    StatsText.TextXAlignment = Enum.TextXAlignment.Left
-
-    task.spawn(function()
-        while task.wait(1) do
-            StatsText.Text = string.format("Time: %s\nFPS: %d\nBacBeo HUB Pro", os.date("%X"), math.floor(1/task.wait()))
-        end
-    end)
-
-    -- CÁC HÀM XỬ LÝ NÚT VÀ FOLDER
-    local WindowActions = {}
-
-    function WindowActions:CreateFolder(folderName)
-        local Folder = Instance.new("Frame", Container)
-        Folder.Size = UDim2.new(1, 0, 0, 30)
-        Folder.AutomaticSize = Enum.AutomaticSize.Y
-        Folder.BackgroundTransparency = 1
-
-        local FolderLayout = Instance.new("UIListLayout", Folder)
-        FolderLayout.Padding = UDim.new(0, 5)
-
-        local FolderTitle = Instance.new("TextLabel", Folder)
-        FolderTitle.Size = UDim2.new(1, 0, 0, 20)
-        FolderTitle.Text = "-- " .. folderName .. " --"
-        FolderTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
-        FolderTitle.Font = Enum.Font.Code
-        FolderTitle.BackgroundTransparency = 1
-
-        local FolderActions = {}
-        function FolderActions:CreateButton(btnName, callback)
-            local Button = Instance.new("TextButton", Folder)
-            Button.Size = UDim2.new(1, 0, 0, 35)
-            Button.Text = btnName
-            Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            Button.TextColor3 = Color3.new(1, 1, 1)
-            Button.Font = Enum.Font.Code
-            Instance.new("UICorner", Button)
-            Button.MouseButton1Click:Connect(callback)
-        end
-        return FolderActions
-    end
-
-    return WindowActions
-end
-
+  
 return Library
