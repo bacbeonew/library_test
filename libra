@@ -7,9 +7,24 @@ function Library:CreateWindow(hubName)
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "BacBeoDashboard"
 
-  
+    -- 1. Khung Main chính
+    local MainFrame = Instance.new("Frame", ScreenGui)
+    MainFrame.Size = UDim2.new(0, 400, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
-    -- TÍNH NĂNG KÉO THẢ
+    -- 2. Tiêu đề
+    local Title = Instance.new("TextLabel", MainFrame)
+    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.Text = hubName
+    Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Title.Font = Enum.Font.Code
+    Title.TextSize = 18
+    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 10)
+
+    -- TÍNH NĂNG KÉO THẢ (Nằm trong CreateWindow để nhận diện MainFrame)
     local dragging, dragInput, dragStart, startPos
     MainFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -28,5 +43,9 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-  
+    -- (Xóa StatsFrame và task.spawn ở đây)
+
+    return {MainFrame = MainFrame} -- Trả về bảng để tạo tiếp Folder/Button
+end
+
 return Library
