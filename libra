@@ -1,109 +1,47 @@
 local Library = {}
--- Chèn đoạn này vào bên trong hàm CreateWindow, phía trên phần Stats
-local UserIcon = Instance.new("ImageLabel", MainFrame)
-UserIcon.Size = UDim2.new(0, 60, 0, 60)
-UserIcon.Position = UDim2.new(0, 10, 0, 50) -- Đặt dưới tiêu đề
-UserIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-UserIcon.Image = game:GetService("Players"):GetUserThumbnailAsync(
-    game.Players.LocalPlayer.UserId, 
-    Enum.ThumbnailType.HeadShot, 
-    Enum.ThumbnailSize.Size100x100
-) -- Lấy hình Avatar của ông
-Instance.new("UICorner", UserIcon).CornerRadius = UDim.new(1, 0) -- Bo tròn ảnh
 
-local WelcomeText = Instance.new("TextLabel", MainFrame)
-WelcomeText.Size = UDim2.new(0, 200, 0, 20)
-WelcomeText.Position = UDim2.new(0, 80, 0, 60)
-WelcomeText.Text = "User: " .. game.Players.LocalPlayer.Name
-WelcomeText.Font = Enum.Font.Code
-WelcomeText.TextColor3 = Color3.fromRGB(0, 255, 0)
-WelcomeText.BackgroundTransparency = 1
-WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
 function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
-    local UserInputService = game:GetService("UserInputService")
-    
-    -- 1. Tạo ScreenGui chính
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
-    ScreenGui.Name = "BacBeoCustomHub"
+    ScreenGui.Name = "BacBeoDashboard"
 
-    -- 2. Tạo khung Menu chính
+    -- 1. Khung chính (MainFrame)
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Size = UDim2.new(0, 400, 0, 300)
     MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    MainFrame.BorderSizePixel = 0
-    -- Thêm bo góc cho xịn
+    MainFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     local Corner = Instance.new("UICorner", MainFrame)
-    Corner.CornerRadius = UDim.new(0, 8)
+    Corner.CornerRadius = UDim.new(0, 10)
 
-    -- 3. Tạo tiêu đề (Font Code Hacker)
+    -- 2. Tiêu đề
     local Title = Instance.new("TextLabel", MainFrame)
     Title.Size = UDim2.new(1, 0, 0, 40)
     Title.Text = hubName
     Title.TextColor3 = Color3.fromRGB(0, 255, 0)
-    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Title.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
     Title.Font = Enum.Font.Code
     Title.TextSize = 18
-    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 8)
+    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 10)
 
-    -- 4. Khung chứa nút (Để các nút không bị tràn ra ngoài)
+    -- 3. Khung chứa Folder (ScrollingFrame) để không bị trống
     local Container = Instance.new("ScrollingFrame", MainFrame)
-    Container.Size = UDim2.new(1, -10, 1, -50)
-    Container.Position = UDim2.new(0, 5, 0, 45)
+    Container.Size = UDim2.new(1, -20, 1, -60)
+    Container.Position = UDim2.new(0, 10, 0, 50)
     Container.BackgroundTransparency = 1
     Container.ScrollBarThickness = 2
     Container.CanvasSize = UDim2.new(0, 0, 0, 0)
     Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
-
+    
     local Layout = Instance.new("UIListLayout", Container)
-    Layout.Padding = UDim.new(0, 5)
+    Layout.Padding = UDim.new(0, 8)
     Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
-    -------------------------------------------------------
-    -- TÍNH NĂNG KÉO THẢ (Đã đưa vào trong hàm)
-    -------------------------------------------------------
-    local dragging, dragInput, dragStart, startPos
-    local function update(input)
-        local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-    end
-
-    MainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then dragging = false end
-            end)
-        end
-    end)
-
-    MainFrame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then update(input) end
-    end)
-
-    -- Phím tắt ẩn/hiện (Bấm RightControl)
-    UserInputService.InputBegan:Connect(function(input, processed)
-        if not processed and input.KeyCode == Enum.KeyCode.RightControl then
-            ScreenGui.Enabled = not ScreenGui.Enabled
-        end
-    end)
-    -------------------------------------------------------
-
-    -- Bảng thông số (Time, FPS, Friends)
+    -- PHẦN STATS GÓC MÀN HÌNH
     local StatsFrame = Instance.new("Frame", ScreenGui)
-    StatsFrame.Size = UDim2.new(0, 200, 0, 80)
-    StatsFrame.Position = UDim2.new(1, -210, 0, 10)
-    StatsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    StatsFrame.BackgroundTransparency = 0.5
+    StatsFrame.Size = UDim2.new(0, 180, 0, 70)
+    StatsFrame.Position = UDim2.new(1, -190, 0, 10)
+    StatsFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    StatsFrame.BackgroundTransparency = 0.4
     Instance.new("UICorner", StatsFrame)
 
     local StatsText = Instance.new("TextLabel", StatsFrame)
@@ -117,27 +55,44 @@ function Library:CreateWindow(hubName)
 
     task.spawn(function()
         while task.wait(1) do
-            local currentTime = os.date("%X")
-            local fps = math.floor(1 / task.wait())
-            StatsText.Text = string.format("Time: %s\nFPS: %d\nBacBeo HUB Pro", currentTime, fps)
+            StatsText.Text = string.format("Time: %s\nFPS: %d\nBacBeo HUB Pro", os.date("%X"), math.floor(1/task.wait()))
         end
     end)
 
-    -- Hàm tạo nút bấm
-    local Actions = {}
-    function Actions:CreateButton(btnName, callback)
-        local Button = Instance.new("TextButton", Container)
-        Button.Size = UDim2.new(0, 380, 0, 40)
-        Button.Text = btnName
-        Button.Font = Enum.Font.Code
-        Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        Button.TextColor3 = Color3.new(1, 1, 1)
-        Instance.new("UICorner", Button)
-        
-        Button.MouseButton1Click:Connect(function() callback() end)
+    -- ĐỊNH NGHĨA CÁC HÀM TẠO FOLDER VÀ BUTTON
+    local WindowActions = {}
+
+    function WindowActions:CreateFolder(folderName)
+        local Folder = Instance.new("Frame", Container)
+        Folder.Size = UDim2.new(1, 0, 0, 30) -- Sẽ tự động dãn ra khi có nút
+        Folder.AutomaticSize = Enum.AutomaticSize.Y
+        Folder.BackgroundTransparency = 1
+
+        local FolderLayout = Instance.new("UIListLayout", Folder)
+        FolderLayout.Padding = UDim.new(0, 5)
+
+        local FolderTitle = Instance.new("TextLabel", Folder)
+        FolderTitle.Size = UDim2.new(1, 0, 0, 20)
+        FolderTitle.Text = "-- " .. folderName .. " --"
+        FolderTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+        FolderTitle.Font = Enum.Font.Code
+        FolderTitle.BackgroundTransparency = 1
+
+        local FolderActions = {}
+        function FolderActions:CreateButton(btnName, callback)
+            local Button = Instance.new("TextButton", Folder)
+            Button.Size = UDim2.new(1, 0, 0, 35)
+            Button.Text = btnName
+            Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            Button.TextColor3 = Color3.new(1, 1, 1)
+            Button.Font = Enum.Font.Code
+            Instance.new("UICorner", Button)
+            Button.MouseButton1Click:Connect(callback)
+        end
+        return FolderActions
     end
-    
-    return Actions
+
+    return WindowActions
 end
 
 return Library
