@@ -1,0 +1,87 @@
+local Library = {}
+
+function Library:CreateWindow(hubName)
+    local CoreGui = game:GetService("CoreGui")
+    
+    -- 1. Tạo ScreenGui chính
+    local ScreenGui = Instance.new("ScreenGui", CoreGui)
+    ScreenGui.Name = "BacBeoCustomHub"
+
+    -- 2. Tạo khung Menu chính
+    local MainFrame = Instance.new("Frame", ScreenGui)
+    MainFrame.Size = UDim2.new(0, 400, 0, 300)
+    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    MainFrame.BorderSizePixel = 0
+
+    -- 3. Tạo tiêu đề (Font Code Hacker)
+    local Title = Instance.new("TextLabel", MainFrame)
+    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.Text = hubName
+    Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Title.Font = Enum.Font.Code
+    Title.TextSize = 18
+
+    local Layout = Instance.new("UIListLayout", MainFrame)
+    Layout.Padding = UDim.new(0, 5)
+    Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+
+    -------------------------------------------------------
+    -- PHẦN THÔNG SỐ (TIME, FPS, FRIENDS) - ĐÃ FIX ĐƯA VÀO ĐÂY
+    -------------------------------------------------------
+    local StatsFrame = Instance.new("Frame", ScreenGui)
+    StatsFrame.Size = UDim2.new(0, 200, 0, 80)
+    StatsFrame.Position = UDim2.new(1, -210, 0, 10) 
+    StatsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    StatsFrame.BackgroundTransparency = 0.5
+
+    local StatsText = Instance.new("TextLabel", StatsFrame)
+    StatsText.Size = UDim2.new(1, -10, 1, -10)
+    StatsText.Position = UDim2.new(0, 5, 0, 5)
+    StatsText.Font = Enum.Font.Code
+    StatsText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    StatsText.TextSize = 14
+    StatsText.TextXAlignment = Enum.TextXAlignment.Left
+    StatsText.BackgroundTransparency = 1
+
+    local function getOnlineFriends()
+        local count = 0
+        local success, friends = pcall(function()
+            return game.Players.LocalPlayer:GetFriendsOnline(50)
+        end)
+        if success and friends then
+            for _ in pairs(friends) do count = count + 1 end
+        end
+        return count
+    end
+
+    task.spawn(function()
+        while task.wait(1) do
+            local currentTime = os.date("%X")
+            local fps = math.floor(1 / task.wait())
+            local online = getOnlineFriends()
+            StatsText.Text = string.format("Time: %s\nFPS: %d\nFriends Online: %d", currentTime, fps, online)
+        end
+    end)
+    -------------------------------------------------------
+
+    -- Hàm tạo nút bấm
+    local Actions = {}
+    function Actions:CreateButton(btnName, callback)
+        local Button = Instance.new("TextButton", MainFrame)
+        Button.Size = UDim2.new(0, 380, 0, 40)
+        Button.Text = btnName
+        Button.Font = Enum.Font.Code
+        Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        Button.TextColor3 = Color3.new(1, 1, 1)
+        
+        Button.MouseButton1Click:Connect(function()
+            callback()
+        end)
+    end
+    
+    return Actions
+end
+
+return Library
