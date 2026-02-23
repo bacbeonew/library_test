@@ -1,5 +1,24 @@
 local Library = {}
+-- Chèn đoạn này vào bên trong hàm CreateWindow, phía trên phần Stats
+local UserIcon = Instance.new("ImageLabel", MainFrame)
+UserIcon.Size = UDim2.new(0, 60, 0, 60)
+UserIcon.Position = UDim2.new(0, 10, 0, 50) -- Đặt dưới tiêu đề
+UserIcon.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+UserIcon.Image = game:GetService("Players"):GetUserThumbnailAsync(
+    game.Players.LocalPlayer.UserId, 
+    Enum.ThumbnailType.HeadShot, 
+    Enum.ThumbnailSize.Size100x100
+) -- Lấy hình Avatar của ông
+Instance.new("UICorner", UserIcon).CornerRadius = UDim.new(1, 0) -- Bo tròn ảnh
 
+local WelcomeText = Instance.new("TextLabel", MainFrame)
+WelcomeText.Size = UDim2.new(0, 200, 0, 20)
+WelcomeText.Position = UDim2.new(0, 80, 0, 60)
+WelcomeText.Text = "User: " .. game.Players.LocalPlayer.Name
+WelcomeText.Font = Enum.Font.Code
+WelcomeText.TextColor3 = Color3.fromRGB(0, 255, 0)
+WelcomeText.BackgroundTransparency = 1
+WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
 function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
     local UserInputService = game:GetService("UserInputService")
