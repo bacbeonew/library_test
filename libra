@@ -2,6 +2,7 @@ local Library = {}
 
 function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
+    local UserInputService = game:GetService("UserInputService")
     
     -- 1. Tạo ScreenGui chính
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
@@ -13,6 +14,9 @@ function Library:CreateWindow(hubName)
     MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     MainFrame.BorderSizePixel = 0
+    -- Thêm bo góc cho xịn
+    local Corner = Instance.new("UICorner", MainFrame)
+    Corner.CornerRadius = UDim.new(0, 8)
 
     -- 3. Tạo tiêu đề (Font Code Hacker)
     local Title = Instance.new("TextLabel", MainFrame)
@@ -22,19 +26,66 @@ function Library:CreateWindow(hubName)
     Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     Title.Font = Enum.Font.Code
     Title.TextSize = 18
+    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 8)
 
-    local Layout = Instance.new("UIListLayout", MainFrame)
+    -- 4. Khung chứa nút (Để các nút không bị tràn ra ngoài)
+    local Container = Instance.new("ScrollingFrame", MainFrame)
+    Container.Size = UDim2.new(1, -10, 1, -50)
+    Container.Position = UDim2.new(0, 5, 0, 45)
+    Container.BackgroundTransparency = 1
+    Container.ScrollBarThickness = 2
+    Container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+    local Layout = Instance.new("UIListLayout", Container)
     Layout.Padding = UDim.new(0, 5)
     Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
     -------------------------------------------------------
-    -- PHẦN THÔNG SỐ (TIME, FPS, FRIENDS) - ĐÃ FIX ĐƯA VÀO ĐÂY
+    -- TÍNH NĂNG KÉO THẢ (Đã đưa vào trong hàm)
     -------------------------------------------------------
+    local dragging, dragInput, dragStart, startPos
+    local function update(input)
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    MainFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+
+    MainFrame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then update(input) end
+    end)
+
+    -- Phím tắt ẩn/hiện (Bấm RightControl)
+    UserInputService.InputBegan:Connect(function(input, processed)
+        if not processed and input.KeyCode == Enum.KeyCode.RightControl then
+            ScreenGui.Enabled = not ScreenGui.Enabled
+        end
+    end)
+    -------------------------------------------------------
+
+    -- Bảng thông số (Time, FPS, Friends)
     local StatsFrame = Instance.new("Frame", ScreenGui)
     StatsFrame.Size = UDim2.new(0, 200, 0, 80)
-    StatsFrame.Position = UDim2.new(1, -210, 0, 10) 
+    StatsFrame.Position = UDim2.new(1, -210, 0, 10)
     StatsFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     StatsFrame.BackgroundTransparency = 0.5
+    Instance.new("UICorner", StatsFrame)
 
     local StatsText = Instance.new("TextLabel", StatsFrame)
     StatsText.Size = UDim2.new(1, -10, 1, -10)
@@ -42,43 +93,29 @@ function Library:CreateWindow(hubName)
     StatsText.Font = Enum.Font.Code
     StatsText.TextColor3 = Color3.fromRGB(0, 255, 0)
     StatsText.TextSize = 14
-    StatsText.TextXAlignment = Enum.TextXAlignment.Left
     StatsText.BackgroundTransparency = 1
-
-    local function getOnlineFriends()
-        local count = 0
-        local success, friends = pcall(function()
-            return game.Players.LocalPlayer:GetFriendsOnline(50)
-        end)
-        if success and friends then
-            for _ in pairs(friends) do count = count + 1 end
-        end
-        return count
-    end
+    StatsText.TextXAlignment = Enum.TextXAlignment.Left
 
     task.spawn(function()
         while task.wait(1) do
             local currentTime = os.date("%X")
             local fps = math.floor(1 / task.wait())
-            local online = getOnlineFriends()
-            StatsText.Text = string.format("Time: %s\nFPS: %d\nFriends Online: %d", currentTime, fps, online)
+            StatsText.Text = string.format("Time: %s\nFPS: %d\nBacBeo HUB Pro", currentTime, fps)
         end
     end)
-    -------------------------------------------------------
 
     -- Hàm tạo nút bấm
     local Actions = {}
     function Actions:CreateButton(btnName, callback)
-        local Button = Instance.new("TextButton", MainFrame)
+        local Button = Instance.new("TextButton", Container)
         Button.Size = UDim2.new(0, 380, 0, 40)
         Button.Text = btnName
         Button.Font = Enum.Font.Code
         Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
         Button.TextColor3 = Color3.new(1, 1, 1)
+        Instance.new("UICorner", Button)
         
-        Button.MouseButton1Click:Connect(function()
-            callback()
-        end)
+        Button.MouseButton1Click:Connect(function() callback() end)
     end
     
     return Actions
