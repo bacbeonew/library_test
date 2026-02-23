@@ -7,19 +7,7 @@ function Library:CreateWindow(hubName)
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = "BacBeoDashboard"
 
-    
-    -- 3. Khung chứa nút (QUAN TRỌNG: Phải có cái này nút mới hiện)
-    local Container = Instance.new("ScrollingFrame", MainFrame)
-    Container.Size = UDim2.new(1, -20, 1, -60)
-    Container.Position = UDim2.new(0, 10, 0, 50)
-    Container.BackgroundTransparency = 1
-    Container.ScrollBarThickness = 2
-    Container.CanvasSize = UDim2.new(0, 0, 0, 0)
-    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
-
-    local Layout = Instance.new("UIListLayout", Container)
-    Layout.Padding = UDim.new(0, 5)
-    Layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+  
 
     -- TÍNH NĂNG KÉO THẢ
     local dragging, dragInput, dragStart, startPos
