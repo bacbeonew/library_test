@@ -24,7 +24,27 @@ function Library:CreateWindow(hubName)
     Title.TextSize = 18
     Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 10)
 
-    -- TÍNH NĂNG KÉO THẢ (Nằm trong CreateWindow để nhận diện MainFrame)
+    -------------------------------------------------------
+    -- PHẦN THÔNG TIN GAME (Thay thế cho FPS cũ)
+    -------------------------------------------------------
+    local InfoFrame = Instance.new("Frame", ScreenGui)
+    InfoFrame.Size = UDim2.new(0, 180, 0, 50)
+    InfoFrame.Position = UDim2.new(1, -190, 0, 10)
+    InfoFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    InfoFrame.BackgroundTransparency = 0.5
+    Instance.new("UICorner", InfoFrame)
+
+    local InfoText = Instance.new("TextLabel", InfoFrame)
+    InfoText.Size = UDim2.new(1, -10, 1, -10)
+    InfoText.Position = UDim2.new(0, 5, 0, 5)
+    InfoText.Font = Enum.Font.Code
+    InfoText.TextColor3 = Color3.fromRGB(0, 255, 0)
+    InfoText.TextSize = 14
+    InfoText.BackgroundTransparency = 1
+    InfoText.Text = "Game ID: " .. game.PlaceId -- Hiện cái số 18519254033 của ông
+    -------------------------------------------------------
+
+    -- TÍNH NĂNG KÉO THẢ
     local dragging, dragInput, dragStart, startPos
     MainFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -43,9 +63,7 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- (Xóa StatsFrame và task.spawn ở đây)
-
-    return {MainFrame = MainFrame} -- Trả về bảng để tạo tiếp Folder/Button
+    return {MainFrame = MainFrame}
 end
 
 return Library
