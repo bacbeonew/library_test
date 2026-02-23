@@ -1,1 +1,19 @@
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bacbeonew/library_test/refs/heads/main/libra"))()
 
+local x = library:CreateWindow("BacBeo DASHBOARD") -- Đổi tên cho hợp lý
+
+
+
+local b = x:CreateFolder("Thông Tin Game") -- Tạo ngăn chứa
+
+
+
+b:CreateButton("Copy PlaceId (Game ID)", function()
+
+    local placeId = game.PlaceId -- Đây chính là dãy số 18519254033 của ông
+
+    setclipboard(tostring(placeId)) -- Copy dãy số vào bộ nhớ tạm
+
+    print("Đã copy PlaceId: " .. placeId)
+
+end)
