@@ -24,9 +24,17 @@ function Library:CreateWindow(hubName)
     Title.TextSize = 18
     Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 10)
 
-    -------------------------------------------------------
-    -- PHẦN THÔNG TIN GAME (Thay thế cho FPS cũ)
-    -------------------------------------------------------
+    -- 3. Khung chứa Folder
+    local Container = Instance.new("ScrollingFrame", MainFrame)
+    Container.Size = UDim2.new(1, -20, 1, -60)
+    Container.Position = UDim2.new(0, 10, 0, 50)
+    Container.BackgroundTransparency = 1
+    Container.ScrollBarThickness = 2
+    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    local Layout = Instance.new("UIListLayout", Container)
+    Layout.Padding = UDim.new(0, 5)
+
+    -- 4. Bảng thông tin góc phải
     local InfoFrame = Instance.new("Frame", ScreenGui)
     InfoFrame.Size = UDim2.new(0, 180, 0, 50)
     InfoFrame.Position = UDim2.new(1, -190, 0, 10)
@@ -41,19 +49,13 @@ function Library:CreateWindow(hubName)
     InfoText.TextColor3 = Color3.fromRGB(0, 255, 0)
     InfoText.TextSize = 14
     InfoText.BackgroundTransparency = 1
-    InfoText.Text = "Game ID: " .. game.PlaceId -- Hiện cái số 18519254033 của ông
-    -------------------------------------------------------
+    InfoText.Text = "Game ID: " .. game.PlaceId -- Hiện dãy 18519254033
 
-    -- TÍNH NĂNG KÉO THẢ
-    local dragging, dragInput, dragStart, startPos
+    -- KÉO THẢ
+    local dragging, dragStart, startPos
     MainFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true
-            dragStart = input.Position
-            startPos = MainFrame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then dragging = false end
-            end)
+            dragging = true; dragStart = input.Position; startPos = MainFrame.Position
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
@@ -62,8 +64,28 @@ function Library:CreateWindow(hubName)
             MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
+    end)
 
-    return {MainFrame = MainFrame}
+    -- LOGIC TẠO FOLDER VÀ BUTTON (ĐỂ GỌI ĐƯỢC LIB)
+    local WindowActions = {}
+    function WindowActions:CreateFolder(folderName)
+        local Folder = Instance.new("Frame", Container)
+        Folder.Size = UDim2.new(1, 0, 0, 30); Folder.AutomaticSize = Enum.AutomaticSize.Y; Folder.BackgroundTransparency = 1
+        Instance.new("UIListLayout", Folder).Padding = UDim.new(0, 5)
+
+        local FolderActions = {}
+        function FolderActions:CreateButton(btnName, callback)
+            local Button = Instance.new("TextButton", Folder)
+            Button.Size = UDim2.new(1, 0, 0, 35); Button.Text = btnName; Button.Font = Enum.Font.Code
+            Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Button.TextColor3 = Color3.new(1,1,1)
+            Instance.new("UICorner", Button)
+            Button.MouseButton1Click:Connect(callback)
+        end
+        return FolderActions
+    end
+    return WindowActions
 end
 
 return Library
