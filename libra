@@ -1,3 +1,4 @@
+
 local Library = {}
 
 function Library:CreateWindow(hubName)
@@ -6,8 +7,16 @@ function Library:CreateWindow(hubName)
     local TweenService = game:GetService("TweenService")
     local Players = game:GetService("Players")
     
+    -- TÍNH NĂNG: Tự động xóa bản cũ nếu có bản mới kích hoạt
+    local GuiName = "BacBeoDashboardPro"
+    local OldGui = CoreGui:FindFirstChild(GuiName) or Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"):FindFirstChild(GuiName)
+    if OldGui then
+        OldGui:Destroy()
+        warn("Đã tắt phiên bản BacBeo HUB cũ để khởi chạy bản mới!")
+    end
+
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
-    ScreenGui.Name = "BacBeoDashboardPro"
+    ScreenGui.Name = GuiName
 
     -- 1. Khung Main chính
     local MainFrame = Instance.new("Frame", ScreenGui)
@@ -17,7 +26,7 @@ function Library:CreateWindow(hubName)
     MainFrame.ClipsDescendants = true
     Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12) -- Bo góc xịn hơn
 
-    -- NÂNG CẤP 1: Viền phát sáng Neon màu xanh hacker
+    -- Viền phát sáng Neon màu xanh hacker
     local UIStroke = Instance.new("UIStroke", MainFrame)
     UIStroke.Color = Color3.fromRGB(0, 255, 100)
     UIStroke.Thickness = 2
@@ -26,7 +35,7 @@ function Library:CreateWindow(hubName)
     -- 2. Tiêu đề
     local Title = Instance.new("TextLabel", MainFrame)
     Title.Size = UDim2.new(1, 0, 0, 45)
-    Title.Text = "   " .. hubName
+    Title.Text = "    " .. hubName
     Title.TextColor3 = Color3.fromRGB(0, 255, 100)
     Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Title.Font = Enum.Font.Code
@@ -34,7 +43,7 @@ function Library:CreateWindow(hubName)
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
 
-    -- NÂNG CẤP 2: Tự động lấy Avatar chính chủ người đang dùng và hiện Tên
+    -- Tự động lấy Avatar chính chủ người đang dùng và hiện Tên
     local AvatarImg = Instance.new("ImageLabel", MainFrame)
     AvatarImg.Size = UDim2.new(0, 50, 0, 50)
     AvatarImg.Position = UDim2.new(0, 15, 0, 60)
@@ -56,7 +65,7 @@ function Library:CreateWindow(hubName)
     WelcomeText.BackgroundTransparency = 1
     WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- 3. Khung chứa Folder (Được đẩy dịch xuống dưới phần Avatar)
+    -- 3. Khung chứa Folder
     local Container = Instance.new("ScrollingFrame", MainFrame)
     Container.Size = UDim2.new(1, -30, 1, -135)
     Container.Position = UDim2.new(0, 15, 0, 125)
@@ -65,7 +74,38 @@ function Library:CreateWindow(hubName)
     Container.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
     Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
     local Layout = Instance.new("UIListLayout", Container)
-    Layout.Padding = UDim.new(0, 6)
+    Layout.Padding = UDim.new(0, 12) -- Đã update khoảng cách 12 chống dính chữ cực thoáng!
+
+    -- TÍNH NĂNG: Tạo nút tam giác ẩn/hiện menu (Thu gọn gọn gàng)
+    local ToggleBtn = Instance.new("TextButton", MainFrame)
+    ToggleBtn.Name = "ToggleBtn"
+    ToggleBtn.Size = UDim2.new(0, 30, 0, 30)
+    ToggleBtn.Position = UDim2.new(1, -35, 0, 7) -- Căn góc phải thanh tiêu đề cực chuẩn
+    ToggleBtn.BackgroundTransparency = 1
+    ToggleBtn.Text = "▼"
+    ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+    ToggleBtn.TextSize = 18
+    ToggleBtn.Font = Enum.Font.SourceSansBold
+
+    local IsCollapsed = false
+    ToggleBtn.MouseButton1Click:Connect(function()
+        IsCollapsed = not IsCollapsed
+        if IsCollapsed then
+            -- Thu gọn: Ẩn Avatar và nút bấm, đổi icon thành tam giác hướng lên, thu nhỏ MainFrame vừa khít thanh tiêu đề
+            Container.Visible = false
+            AvatarImg.Visible = false
+            WelcomeText.Visible = false
+            ToggleBtn.Text = "▲"
+            MainFrame.Size = UDim2.new(0, 420, 0, 45)
+        else
+            -- Mở rộng: Hiện lại toàn bộ giao diện như cũ
+            Container.Visible = true
+            AvatarImg.Visible = true
+            WelcomeText.Visible = true
+            ToggleBtn.Text = "▼"
+            MainFrame.Size = UDim2.new(0, 420, 0, 320)
+        end
+    end)
 
     -- 4. Bảng thông tin góc phải hiển thị Game ID
     local InfoFrame = Instance.new("Frame", ScreenGui)
@@ -104,13 +144,21 @@ function Library:CreateWindow(hubName)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
-    -- NÂNG CẤP 3: Phím tắt đóng/mở mượt mà bằng phím RightControl (Bấm phát ẩn/hiện mượt)
+    -- Phím tắt đóng/mở mượt mà bằng phím RightControl
     local isOpened = true
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
             isOpened = not isOpened
             local targetSize = isOpened and UDim2.new(0, 420, 0, 320) or UDim2.new(0, 420, 0, 0)
             TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
+            -- Reset lại trạng thái nút bấm tam giác nếu người dùng ẩn bằng phím tắt
+            if not isOpened then
+                Container.Visible = false; AvatarImg.Visible = false; WelcomeText.Visible = false; ToggleBtn.Text = "▲"
+                IsCollapsed = true
+            else
+                Container.Visible = true; AvatarImg.Visible = true; WelcomeText.Visible = true; ToggleBtn.Text = "▼"
+                IsCollapsed = false
+            end
         end
     end)
 
@@ -149,64 +197,3 @@ function Library:CreateWindow(hubName)
 end
 
 return Library
-
-
-
-
-
-
-
-
-
--- 1. Tạo nút tam giác thu gọn/mở rộng
-local ToggleBtn = Instance.new("TextButton")
-ToggleBtn.Name = "ToggleBtn"
-ToggleBtn.Parent = MainFrame -- Hoặc TopBar tùy theo cách ông đặt tên thanh tiêu đề
-ToggleBtn.Size = UDim2.new(0, 30, 0, 30)
-ToggleBtn.Position = UDim2.new(1, -35, 0, 5) -- Nằm ở góc bên phải thanh tiêu đề
-ToggleBtn.BackgroundTransparency = 1
-ToggleBtn.Text = "▼" -- Mặc định là tam giác hướng xuống (đang mở)
-ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 120) -- Màu xanh neon đồng bộ với Hub
-ToggleBtn.TextSize = 18
-ToggleBtn.Font = Enum.Font.SourceSansBold
-
--- 2. Logic ẩn/hiện phần nội dung phía dưới (Container)
-local IsCollapsed = false
-ToggleBtn.MouseButton1Click:Connect(function()
-    IsCollapsed = not IsCollapsed
-    if IsCollapsed then
-        -- Thu gọn: Ẩn phần nội dung, đổi icon thành tam giác hướng lên, thu nhỏ MainFrame
-        Container.Visible = false
-        if MainFrame:FindFirstChild("UserDataFrame") then MainFrame.UserDataFrame.Visible = false end -- Ẩn luôn Avatar nếu có
-        ToggleBtn.Text = "▲"
-        MainFrame.Size = UDim2.new(0, 450, 0, 40) -- Chỉ giữ lại đúng chiều cao thanh tiêu đề (khoảng 40px)
-    else
-        -- Mở rộng: Hiện lại toàn bộ, đổi icon thành tam giác hướng xuống
-        Container.Visible = true
-        if MainFrame:FindFirstChild("UserDataFrame") then MainFrame.UserDataFrame.Visible = true end
-        ToggleBtn.Text = "▼"
-        MainFrame.Size = UDim2.new(0, 450, 0, 350) -- Trả về chiều cao gốc của Hub ông đang để
-    end
-end)
-
-
-
-
-
-
-
--- Đặt tên chính xác cho ScreenGui của ông để dễ quản lý
-local GuiName = "BacBeoDashboard_Unique"
-
--- Kiểm tra xem có bản cũ đang chạy trong CoreGui hoặc PlayerGui không
-local OldGui = game:GetService("CoreGui"):FindFirstChild(GuiName) or game:GetService("Players").LocalPlayer:FindFirstChildOfClass("PlayerGui"):FindFirstChild(GuiName)
-
-if OldGui then
-    OldGui:Destroy() -- Xóa bản cũ đi ngay lập tức!
-    warn("Đã tắt phiên bản BacBeo HUB cũ để khởi chạy bản mới!")
-end
-
--- Sau đó mới đến đoạn tạo ScreenGui mới của ông:
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = GuiName
--- Tiếp tục các đoạn code khởi tạo UI phía dưới...
