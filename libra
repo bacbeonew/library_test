@@ -9,18 +9,21 @@ function Library:CreateWindow(hubName)
     local GuiName = "BacBeoDashboardPro"
     local ScreenGui = CoreGui:FindFirstChild(GuiName)
     
-    -- Nếu chưa có ScreenGui thì tạo mới, nếu có rồi thì dùng lại để gom chung vào 1 nơi
+    -- Nếu đã có ScreenGui cũ thì gom chung, chưa có thì tạo mới
     if not ScreenGui then
         ScreenGui = Instance.new("ScreenGui", CoreGui)
         ScreenGui.Name = GuiName
+        ScreenGui.ResetOnSpawn = false
     end
 
-    -- TÍNH NĂNG: Trước khi tạo Hub mới, bắt TẤT CẢ các Hub cũ trong ScreenGui thu nhỏ lại
+    -- TÍNH NĂNG: Bắt tất cả các Hub cũ thu nhỏ lại thành thanh tiêu đề
     for _, child in pairs(ScreenGui:GetChildren()) do
         if child:IsA("Frame") and child.Name == "MainFrame" then
             if child:FindFirstChild("ScrollingFrame") then child.ScrollingFrame.Visible = false end
             if child:FindFirstChild("ImageLabel") then child.ImageLabel.Visible = false end
-            if child:FindFirstChild("TextLabel") and child.TextLabel.Name ~= "Title" then child.TextLabel.Visible = false end
+            for _, txt in pairs(child:GetChildren()) do
+                if txt:IsA("TextLabel") and txt.Name ~= "Title" then txt.Visible = false end
+            end
             if child:FindFirstChild("ToggleBtn") then child.ToggleBtn.Text = "▲" end
             child.Size = UDim2.new(0, 420, 0, 45)
         end
@@ -31,10 +34,10 @@ function Library:CreateWindow(hubName)
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 420, 0, 320)
     
-    -- Tự động dịch chuyển vị trí Hub mới một chút để không bị đè khít lên Hub cũ
+    -- Dịch chuyển tọa độ nhẹ để không đè khít lên cái cũ
     local existingHubs = 0
     for _, child in pairs(ScreenGui:GetChildren()) do if child.Name == "MainFrame" then existingHubs = existingHubs + 1 end end
-    MainFrame.Position = UDim2.new(0.5, -210 + (existingHubs * 10), 0.5, -160 + (existingHubs * 10))
+    MainFrame.Position = UDim2.new(0.5, -210 + ((existingHubs - 1) * 15), 0.5, -160 + ((existingHubs - 1) * 15))
     
     MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
     MainFrame.ClipsDescendants = true
@@ -58,7 +61,7 @@ function Library:CreateWindow(hubName)
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
 
-    -- Tự động lấy Avatar chính chủ người đang dùng và hiện Tên
+    -- Tự động lấy Avatar người dùng
     local AvatarImg = Instance.new("ImageLabel", MainFrame)
     AvatarImg.Size = UDim2.new(0, 50, 0, 50)
     AvatarImg.Position = UDim2.new(0, 15, 0, 60)
@@ -86,7 +89,7 @@ function Library:CreateWindow(hubName)
     WelcomeText.BackgroundTransparency = 1
     WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- 3. Khung chứa Folder
+    -- 3. Khung chứa Folder nút bấm
     local Container = Instance.new("ScrollingFrame", MainFrame)
     Container.Size = UDim2.new(1, -30, 1, -135)
     Container.Position = UDim2.new(0, 15, 0, 125)
@@ -95,9 +98,9 @@ function Library:CreateWindow(hubName)
     Container.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
     Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
     local Layout = Instance.new("UIListLayout", Container)
-    Layout.Padding = UDim.new(0, 12)
+    Layout.Padding = UDim.new(0, 8)
 
-    -- Tạo nút tam giác ẩn/hiện menu
+    -- Nút tam giác ẩn/hiện menu
     local ToggleBtn = Instance.new("TextButton", MainFrame)
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 30, 0, 30)
@@ -107,6 +110,7 @@ function Library:CreateWindow(hubName)
     ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
     ToggleBtn.TextSize = 18
     ToggleBtn.Font = Enum.Font.SourceSansBold
+    ToggleBtn.ZIndex = 10
 
     local IsCollapsed = false
     ToggleBtn.MouseButton1Click:Connect(function()
@@ -178,56 +182,76 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- DÀNH CHO QUẢN LÝ CHỨC NĂNG TRONG SCRIPT CHÍNH
+    -- LOGIC TẠO FOLDER VÀ CÁC THÀNH PHẦN CON
     local WindowActions = {}
+    
     function WindowActions:CreateFolder(folderName)
         local Folder = Instance.new("Frame", Container)
-        Folder.Size = UDim2.new(1, 0, 0, 25); Folder.AutomaticSize = Enum.AutomaticSize.Y; Folder.BackgroundTransparency = 1
-        Instance.new("UIListLayout", Folder).Padding = UDim.new(0, 6)
+        Folder.Size = UDim2.new(1, 0, 0, 25)
+        Folder.AutomaticSize = Enum.AutomaticSize.Y
+        Folder.BackgroundTransparency = 1
+        
+        local FolderLayout = Instance.new("UIListLayout", Folder)
+        FolderLayout.Padding = UDim.new(0, 6)
 
         local FolderTitle = Instance.new("TextLabel", Folder)
         FolderTitle.Size = UDim2.new(1, 0, 0, 20)
         FolderTitle.Text = "[" .. folderName:upper() .. "]"
         FolderTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
-        FolderTitle.Font = Enum.Font.Code; FolderTitle.TextSize = 14
-        FolderTitle.BackgroundTransparency = 1; FolderTitle.TextXAlignment = Enum.TextXAlignment.Left
+        FolderTitle.Font = Enum.Font.Code
+        FolderTitle.TextSize = 14
+        FolderTitle.BackgroundTransparency = 1
+        FolderTitle.TextXAlignment = Enum.TextXAlignment.Left
 
         local FolderActions = {}
         
-        -- 1. Hàm Tạo Button cũ
+        -- 1. Hàm tạo Button (Chấp nhận cả :CreateButton và :Button)
         function FolderActions:CreateButton(btnName, callback)
             local Button = Instance.new("TextButton", Folder)
-            Button.Size = UDim2.new(1, 0, 0, 36); Button.Text = btnName; Button.Font = Enum.Font.Code; Button.TextSize = 14
-            Button.BackgroundColor3 = Color3.fromRGB(25, 25, 25); Button.TextColor3 = Color3.new(1, 1, 1)
+            Button.Size = UDim2.new(1, 0, 0, 36)
+            Button.Text = btnName
+            Button.Font = Enum.Font.Code
+            Button.TextSize = 14
+            Button.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            Button.TextColor3 = Color3.new(1, 1, 1)
             Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 6)
+            
             local BtnStroke = Instance.new("UIStroke", Button)
             BtnStroke.Color = Color3.fromRGB(50, 50, 50)
+            
             Button.MouseEnter:Connect(function() BtnStroke.Color = Color3.fromRGB(0, 255, 100) end)
             Button.MouseLeave:Connect(function() BtnStroke.Color = Color3.fromRGB(50, 50, 50) end)
             Button.MouseButton1Click:Connect(callback)
         end
-        
-        -- Thêm bí danh để tương thích nếu script gọi :Button() thay vì :CreateButton()
-        FolderActions.Button = FolderActions:CreateButton
+        FolderActions.Button = FolderActions.CreateButton
 
-        -- 2. BỔ SUNG HÀM TOGGLE (Bật / Tắt chức năng)
+        -- 2. Hàm tạo Toggle chuẩn chỉ
         function FolderActions:Toggle(toggleName, callback)
             local ToggleFrame = Instance.new("Frame", Folder)
-            ToggleFrame.Size = UDim2.new(1, 0, 0, 36); ToggleFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+            ToggleFrame.Size = UDim2.new(1, 0, 0, 36)
+            ToggleFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
             Instance.new("UICorner", ToggleFrame).CornerRadius = UDim.new(0, 6)
+            
             local TStroke = Instance.new("UIStroke", ToggleFrame)
             TStroke.Color = Color3.fromRGB(50, 50, 50)
 
             local ToggleLabel = Instance.new("TextLabel", ToggleFrame)
-            ToggleLabel.Size = UDim2.new(1, -50, 1, 0); ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
-            ToggleLabel.Text = toggleName; ToggleLabel.Font = Enum.Font.Code; ToggleLabel.TextSize = 14
-            ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255); ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
+            ToggleLabel.Size = UDim2.new(1, -50, 1, 0)
+            ToggleLabel.Position = UDim2.new(0, 10, 0, 0)
+            ToggleLabel.Text = toggleName
+            ToggleLabel.Font = Enum.Font.Code
+            ToggleLabel.TextSize = 14
+            ToggleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+            ToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
             ToggleLabel.BackgroundTransparency = 1
 
             local CheckBox = Instance.new("TextButton", ToggleFrame)
-            CheckBox.Size = UDim2.new(0, 20, 0, 20); CheckBox.Position = UDim2.new(1, -30, 0.5, -10)
-            CheckBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15); CheckBox.Text = ""
+            CheckBox.Size = UDim2.new(0, 20, 0, 20)
+            CheckBox.Position = UDim2.new(1, -30, 0.5, -10)
+            CheckBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+            CheckBox.Text = ""
             Instance.new("UICorner", CheckBox).CornerRadius = UDim.new(0, 4)
+            
             local CBStroke = Instance.new("UIStroke", CheckBox)
             CBStroke.Color = Color3.fromRGB(80, 80, 80)
 
@@ -236,53 +260,7 @@ function Library:CreateWindow(hubName)
                 state = not state
                 if state then
                     CheckBox.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
-                    CheckBox.Text = "✓"; CheckBox.TextColor3 = Color3.fromRGB(0, 0, 0)
+                    CheckBox.Text = "✓"
+                    CheckBox.TextColor3 = Color3.fromRGB(0, 0, 0)
                     TStroke.Color = Color3.fromRGB(0, 255, 100)
                 else
-                    CheckBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-                    CheckBox.Text = ""; TStroke.Color = Color3.fromRGB(50, 50, 50)
-                end
-                callback(state)
-            end)
-        end
-
-        -- 3. BỔ SUNG HÀM BOX (Ô nhập số Speed / Jump)
-        function FolderActions:Box(boxName, inputType, callback)
-            local BoxFrame = Instance.new("Frame", Folder)
-            BoxFrame.Size = UDim2.new(1, 0, 0, 36); BoxFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-            Instance.new("UICorner", BoxFrame).CornerRadius = UDim.new(0, 6)
-            local BStroke = Instance.new("UIStroke", BoxFrame)
-            BStroke.Color = Color3.fromRGB(50, 50, 50)
-
-            local BoxLabel = Instance.new("TextLabel", BoxFrame)
-            BoxLabel.Size = UDim2.new(0, 150, 1, 0); BoxLabel.Position = UDim2.new(0, 10, 0, 0)
-            BoxLabel.Text = boxName; BoxLabel.Font = Enum.Font.Code; BoxLabel.TextSize = 14
-            BoxLabel.TextColor3 = Color3.fromRGB(255, 255, 255); BoxLabel.TextXAlignment = Enum.TextXAlignment.Left
-            BoxLabel.BackgroundTransparency = 1
-
-            local TextBox = Instance.new("TextBox", BoxFrame)
-            TextBox.Size = UDim2.new(0, 80, 0, 24); TextBox.Position = UDim2.new(1, -90, 0.5, -12)
-            TextBox.BackgroundColor3 = Color3.fromRGB(15, 15, 15); TextBox.Font = Enum.Font.Code; TextBox.TextSize = 13
-            TextBox.TextColor3 = Color3.fromRGB(0, 255, 100); TextBox.Text = ""
-            TextBox.PlaceholderText = "Nhập..."
-            Instance.new("UICorner", TextBox).CornerRadius = UDim.new(0, 4)
-            local TBStroke = Instance.new("UIStroke", TextBox)
-            TBStroke.Color = Color3.fromRGB(80, 80, 80)
-
-            TextBox.FocusLost:Connect(function(enterPressed)
-                local text = TextBox.Text
-                if inputType == "number" then
-                    local num = tonumber(text)
-                    if num then callback(num) end
-                else
-                    callback(text)
-                end
-            end)
-        end
-
-        return FolderActions
-    end
-    return WindowActions
-end
-
-return Library
