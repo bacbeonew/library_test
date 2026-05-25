@@ -5,50 +5,61 @@ function Library:CreateWindow(hubName)
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
     local Players = game:GetService("Players")
+    local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
     
     -- ========================================================
-    -- 🛠️ FIX LỖI 1: ĐỒNG BỘ TÊN ĐỂ XÓA TẬN GỐC BẢN SAO TRÙNG LẶP
+    -- 🚨 MÁY QUÉT TẬN GỐC: XÓA SẠCH TẤT CẢ BẢN SAO TRÙNG LẶP (ANTI-DUPLICATE)
     -- ========================================================
-    local GuiName = "BacBeoLybraUI_Official" -- Tên đồng bộ duy nhất
-    
-    local OldGui = CoreGui:FindFirstChild(GuiName) or Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"):FindFirstChild(GuiName)
-    if OldGui then
-        OldGui:Destroy()
-        warn("💥 Đã quét và tự động xóa phiên bản BacBeo HUB cũ đang chạy ẩn!")
+    local function CleanOldGUIs(parent)
+        if parent then
+            for _, child in pairs(parent:GetChildren()) do
+                -- Quét tất cả các UI có tên chứa từ khóa của BacBeo Hub để diệt tận gốc
+                if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
+                    child:Destroy()
+                end
+            end
+        end
     end
+    
+    -- Tiến hành càn quét trên mọi môi trường lưu trữ UI của Roblox
+    CleanOldGUIs(CoreGui)
+    CleanOldGUIs(PlayerGui)
+    if game:GetService("GuiService") then CleanOldGUIs(game:GetService("GuiService")) end
 
+    -- Đặt tên định danh mới đồng bộ cho bản này
+    local GuiName = "BacBeoHub_Official_Lybra"
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
 
-    -- 1. Khung Main chính gốc (Chuẩn cấu trúc ảnh image_190e43.jpg)
+    -- 1. Khung Main chính gốc (Chuẩn bo góc viền Neon xanh lá)
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
     MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true -- Giữ các phần tử không bị tràn khi thu nhỏ menu
+    MainFrame.ClipsDescendants = true -- Không cho chữ tràn ra ngoài khi thu nhỏ
     MainFrame.Active = true
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
 
-    -- Viền phát sáng Neon màu xanh hacker
+    -- Viền phát sáng Neon màu xanh hacker chuẩn chỉ
     local UIStroke = Instance.new("UIStroke", MainFrame)
     UIStroke.Color = Color3.fromRGB(0, 255, 100)
     UIStroke.Thickness = 1.5
     UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- 2. Thanh Tiêu đề (TopBar dùng để kéo thả)
+    -- 2. Thanh Tiêu đề (TopBar hỗ trợ kéo thả)
     local TopBar = Instance.new("Frame", MainFrame)
     TopBar.Name = "TopBar"
     TopBar.Size = UDim2.new(1, 0, 0, 50)
     TopBar.BackgroundTransparency = 1
 
     local title = Instance.new("TextLabel", TopBar)
-    title.Size = UDim2.new(0, 200, 1, 0)
-    title.Position = UDim2.new(0, 45, 0, 0)
+    title.Size = UDim2.new(0, 250, 1, 0)
+    title.Position = UDim2.new(0, 20, 0, 0)
     title.BackgroundTransparency = 1
     title.Text = hubName
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -57,12 +68,12 @@ function Library:CreateWindow(hubName)
     title.TextXAlignment = Enum.TextXAlignment.Left
 
     -- ========================================================
-    -- 🛠️ FIX LỖI 2: THÊM NÚT TAM GIÁC ĐÓNG MỞ CHUẨN GÓC PHẢI TOPBAR
+    -- 🛠️ NÚT TAM GIÁC ĐÓNG MỞ (Cố định chuẩn góc phải thanh tiêu đề)
     -- ========================================================
     local ToggleBtn = Instance.new("TextButton", TopBar)
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
-    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) -- Căn chuẩn góc phải trên cùng của Menu
+    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) -- Neo chuẩn góc phải trên cùng
     ToggleBtn.BackgroundTransparency = 1
     ToggleBtn.Text = "▼"
     ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
@@ -94,22 +105,21 @@ function Library:CreateWindow(hubName)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     rightLayout.Padding = UDim.new(0, 8)
 
-    -- LOGIC CLICK NÚT TAM GIÁC: CO GIÃN MENU LÊN XUỐNG BẰNG TWEEN MƯỢT MÀ
+    -- LOGIC CLICK NÚT TAM GIÁC: CO GIÃN MENU MƯỢT MÀ
     local IsCollapsed = false
     local OriginalSize = UDim2.new(0, 550, 0, 380)
-    local CollapsedSize = UDim2.new(0, 550, 0, 50) -- Thu nhỏ lại chỉ chừa đúng thanh tiêu đề
+    local CollapsedSize = UDim2.new(0, 550, 0, 50) -- Thu nhỏ lên sát thanh tiêu đề
 
     ToggleBtn.MouseButton1Click:Connect(function()
         IsCollapsed = not IsCollapsed
         if IsCollapsed then
             ToggleBtn.Text = "▲"
-            -- Ẩn nhanh danh sách tính năng để tạo hiệu ứng thu gọn không bị lỗi hiển thị chữ
             leftContainer.Visible = false
             rightContainer.Visible = false
-            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
+            TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
         else
             ToggleBtn.Text = "▼"
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
             tween:Play()
             tween.Completed:Connect(function()
                 if not IsCollapsed then
@@ -137,7 +147,7 @@ function Library:CreateWindow(hubName)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
-    -- Phím tắt ẩn hoàn toàn GUI khỏi màn hình bằng phím RightControl
+    -- Phím tắt ẩn hoàn toàn GUI khỏi màn hình (RightControl)
     local isOpened = true
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
@@ -151,7 +161,6 @@ function Library:CreateWindow(hubName)
     -- LOGIC TẠO DANH MỤC VÀ TÍNH NĂNG CON
     local windowMethods = {}
     function windowMethods:CreateFolder(folderName)
-        -- Thẻ chuyển mục bên trái (Button)
         local folderBtn = Instance.new("TextButton", leftContainer)
         folderBtn.Size = UDim2.new(1, 0, 0, 36)
         folderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -164,7 +173,6 @@ function Library:CreateWindow(hubName)
         local btnCorner = Instance.new("UICorner", folderBtn)
         btnCorner.CornerRadius = UDim.new(0, 6)
 
-        -- Khung chứa tính năng riêng của mục này bên phải
         local featureFrame = Instance.new("Frame", rightContainer)
         featureFrame.Size = UDim2.new(1, 0, 0, 0)
         featureFrame.AutomaticSize = Enum.AutomaticSize.Y
@@ -176,11 +184,10 @@ function Library:CreateWindow(hubName)
         featureLayout.Padding = UDim.new(0, 6)
 
         if isFirstFolder then
-            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100) -- Làm sáng mục đầu tiên
+            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
             isFirstFolder = false
         end
 
-        -- Sự kiện chuyển tab đổi màu chữ
         folderBtn.MouseButton1Click:Connect(function()
             for _, f in pairs(rightContainer:GetChildren()) do
                 if f:IsA("Frame") then f.Visible = false end
@@ -194,7 +201,6 @@ function Library:CreateWindow(hubName)
 
         local itemMethods = {}
 
-        -- Tính năng con: NÚT BẤM (Button)
         function itemMethods:Button(text, callback)
             local btn = Instance.new("TextButton", featureFrame)
             btn.Size = UDim2.new(1, -5, 0, 34)
@@ -209,7 +215,6 @@ function Library:CreateWindow(hubName)
             return btn
         end
 
-        -- Tính năng con: CÔNG TẮC (Toggle)
         function itemMethods:Toggle(text, callback)
             local state = false
             local tFrame = Instance.new("Frame", featureFrame)
@@ -253,7 +258,6 @@ function Library:CreateWindow(hubName)
             end)
         end
 
-        -- Tính năng con: Ô NHẬP LIỆU (TextBox)
         function itemMethods:Box(text, datatype, callback)
             local bFrame = Instance.new("Frame", featureFrame)
             bFrame.Size = UDim2.new(1, -5, 0, 36)
