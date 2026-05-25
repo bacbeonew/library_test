@@ -3,53 +3,89 @@ local Library = {}
 function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
     local UserInputService = game:GetService("UserInputService")
+    local TweenService = game:GetService("TweenService")
+    local Players = game:GetService("Players")
     
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
-    ScreenGui.Name = "BacBeoDashboard"
+    ScreenGui.Name = "BacBeoDashboardPro"
 
     -- 1. Khung Main chính
     local MainFrame = Instance.new("Frame", ScreenGui)
-    MainFrame.Size = UDim2.new(0, 400, 0, 300)
-    MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
+    MainFrame.Size = UDim2.new(0, 420, 0, 320)
+    MainFrame.Position = UDim2.new(0.5, -210, 0.5, -160)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- Màu tối huyền bí
+    MainFrame.ClipsDescendants = true
+    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12) -- Bo góc xịn hơn
+
+    -- NÂNG CẤP 1: Viền phát sáng Neon màu xanh hacker
+    local UIStroke = Instance.new("UIStroke", MainFrame)
+    UIStroke.Color = Color3.fromRGB(0, 255, 100)
+    UIStroke.Thickness = 2
+    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
     -- 2. Tiêu đề
     local Title = Instance.new("TextLabel", MainFrame)
-    Title.Size = UDim2.new(1, 0, 0, 40)
-    Title.Text = hubName
-    Title.TextColor3 = Color3.fromRGB(0, 255, 0)
-    Title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Title.Size = UDim2.new(1, 0, 0, 45)
+    Title.Text = "   " .. hubName
+    Title.TextColor3 = Color3.fromRGB(0, 255, 100)
+    Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Title.Font = Enum.Font.Code
     Title.TextSize = 18
-    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 10)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
 
-    -- 3. Khung chứa Folder
+    -- NÂNG CẤP 2: Tự động lấy Avatar chính chủ người đang dùng và hiện Tên
+    local AvatarImg = Instance.new("ImageLabel", MainFrame)
+    AvatarImg.Size = UDim2.new(0, 50, 0, 50)
+    AvatarImg.Position = UDim2.new(0, 15, 0, 60)
+    AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    AvatarImg.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+    Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0) -- Bo tròn ảnh đại diện
+    
+    local UserStroke = Instance.new("UIStroke", AvatarImg)
+    UserStroke.Color = Color3.fromRGB(0, 255, 100)
+    UserStroke.Thickness = 1.5
+
+    local WelcomeText = Instance.new("TextLabel", MainFrame)
+    WelcomeText.Size = UDim2.new(0, 200, 0, 20)
+    WelcomeText.Position = UDim2.new(0, 75, 0, 75)
+    WelcomeText.Text = "Chào chủ nhân: " .. Players.LocalPlayer.Name
+    WelcomeText.Font = Enum.Font.Code
+    WelcomeText.TextColor3 = Color3.fromRGB(255, 255, 255)
+    WelcomeText.TextSize = 14
+    WelcomeText.BackgroundTransparency = 1
+    WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
+
+    -- 3. Khung chứa Folder (Được đẩy dịch xuống dưới phần Avatar)
     local Container = Instance.new("ScrollingFrame", MainFrame)
-    Container.Size = UDim2.new(1, -20, 1, -60)
-    Container.Position = UDim2.new(0, 10, 0, 50)
+    Container.Size = UDim2.new(1, -30, 1, -135)
+    Container.Position = UDim2.new(0, 15, 0, 125)
     Container.BackgroundTransparency = 1
-    Container.ScrollBarThickness = 2
+    Container.ScrollBarThickness = 3
+    Container.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
     Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
     local Layout = Instance.new("UIListLayout", Container)
-    Layout.Padding = UDim.new(0, 5)
+    Layout.Padding = UDim.new(0, 6)
 
-    -- 4. Bảng thông tin góc phải
+    -- 4. Bảng thông tin góc phải hiển thị Game ID
     local InfoFrame = Instance.new("Frame", ScreenGui)
-    InfoFrame.Size = UDim2.new(0, 180, 0, 50)
-    InfoFrame.Position = UDim2.new(1, -190, 0, 10)
-    InfoFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    InfoFrame.BackgroundTransparency = 0.5
+    InfoFrame.Size = UDim2.new(0, 190, 0, 45)
+    InfoFrame.Position = UDim2.new(1, -205, 0, 15)
+    InfoFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    InfoFrame.BackgroundTransparency = 0.4
     Instance.new("UICorner", InfoFrame)
+    local InfoStroke = Instance.new("UIStroke", InfoFrame)
+    InfoStroke.Color = Color3.fromRGB(0, 255, 100)
+    InfoStroke.Thickness = 1
 
     local InfoText = Instance.new("TextLabel", InfoFrame)
     InfoText.Size = UDim2.new(1, -10, 1, -10)
     InfoText.Position = UDim2.new(0, 5, 0, 5)
     InfoText.Font = Enum.Font.Code
-    InfoText.TextColor3 = Color3.fromRGB(0, 255, 0)
-    InfoText.TextSize = 14
+    InfoText.TextColor3 = Color3.fromRGB(0, 255, 100)
+    InfoText.TextSize = 13
     InfoText.BackgroundTransparency = 1
-    InfoText.Text = "Game ID: " .. game.PlaceId -- Hiện dãy 18519254033
+    InfoText.Text = "Game ID: " .. game.PlaceId
 
     -- KÉO THẢ
     local dragging, dragStart, startPos
@@ -68,19 +104,43 @@ function Library:CreateWindow(hubName)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
-    -- LOGIC TẠO FOLDER VÀ BUTTON (ĐỂ GỌI ĐƯỢC LIB)
+    -- NÂNG CẤP 3: Phím tắt đóng/mở mượt mà bằng phím RightControl (Bấm phát ẩn/hiện mượt)
+    local isOpened = true
+    UserInputService.InputBegan:Connect(function(input, gpe)
+        if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
+            isOpened = not isOpened
+            local targetSize = isOpened and UDim2.new(0, 420, 0, 320) or UDim2.new(0, 420, 0, 0)
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
+        end
+    end)
+
+    -- LOGIC TẠO FOLDER VÀ BUTTON
     local WindowActions = {}
     function WindowActions:CreateFolder(folderName)
         local Folder = Instance.new("Frame", Container)
-        Folder.Size = UDim2.new(1, 0, 0, 30); Folder.AutomaticSize = Enum.AutomaticSize.Y; Folder.BackgroundTransparency = 1
+        Folder.Size = UDim2.new(1, 0, 0, 25); Folder.AutomaticSize = Enum.AutomaticSize.Y; Folder.BackgroundTransparency = 1
         Instance.new("UIListLayout", Folder).Padding = UDim.new(0, 5)
+
+        local FolderTitle = Instance.new("TextLabel", Folder)
+        FolderTitle.Size = UDim2.new(1, 0, 0, 20)
+        FolderTitle.Text = "[" .. folderName:upper() .. "]"
+        FolderTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+        FolderTitle.Font = Enum.Font.Code; FolderTitle.TextSize = 14
+        FolderTitle.BackgroundTransparency = 1; FolderTitle.TextXAlignment = Enum.TextXAlignment.Left
 
         local FolderActions = {}
         function FolderActions:CreateButton(btnName, callback)
             local Button = Instance.new("TextButton", Folder)
-            Button.Size = UDim2.new(1, 0, 0, 35); Button.Text = btnName; Button.Font = Enum.Font.Code
-            Button.BackgroundColor3 = Color3.fromRGB(40, 40, 40); Button.TextColor3 = Color3.new(1,1,1)
-            Instance.new("UICorner", Button)
+            Button.Size = UDim2.new(1, 0, 0, 38); Button.Text = btnName; Button.Font = Enum.Font.Code; Button.TextSize = 14
+            Button.BackgroundColor3 = Color3.fromRGB(28, 28, 28); Button.TextColor3 = Color3.new(1, 1, 1)
+            Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 6)
+            
+            local BtnStroke = Instance.new("UIStroke", Button)
+            BtnStroke.Color = Color3.fromRGB(50, 50, 50)
+            BtnStroke.Thickness = 1
+
+            Button.MouseEnter:Connect(function() BtnStroke.Color = Color3.fromRGB(0, 255, 100) end)
+            Button.MouseLeave:Connect(function() BtnStroke.Color = Color3.fromRGB(50, 50, 50) end)
             Button.MouseButton1Click:Connect(callback)
         end
         return FolderActions
