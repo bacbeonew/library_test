@@ -6,40 +6,41 @@ function Library:CreateWindow(hubName)
     local TweenService = game:GetService("TweenService")
     local Players = game:GetService("Players")
     
-    -- ==========================================
-    -- TÍNH NĂNG: KIỂM TRA VÀ XÓA BẢN CŨ KHI CHẠY SCRIPT MỚI
-    -- ==========================================
-    local GuiName = "BacBeoLybraUI"
+    -- ========================================================
+    -- 🛠️ FIX LỖI 1: ĐỒNG BỘ TÊN ĐỂ XÓA TẬN GỐC BẢN SAO TRÙNG LẶP
+    -- ========================================================
+    local GuiName = "BacBeoLybraUI_Official" -- Tên đồng bộ duy nhất
+    
     local OldGui = CoreGui:FindFirstChild(GuiName) or Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"):FindFirstChild(GuiName)
     if OldGui then
         OldGui:Destroy()
-        warn("Đã dọn dẹp phiên bản BacBeo HUB cũ để khởi chạy bản mới gọn gàng!")
+        warn("💥 Đã quét và tự động xóa phiên bản BacBeo HUB cũ đang chạy ẩn!")
     end
 
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
 
-    -- 1. Khung Main chính gốc (Chuẩn tối màu bo góc viền Neon)
+    -- 1. Khung Main chính gốc (Chuẩn cấu trúc ảnh image_190e43.jpg)
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
     MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true -- Để khi thu nhỏ không bị tràn phần tử ra ngoài
+    MainFrame.ClipsDescendants = true -- Giữ các phần tử không bị tràn khi thu nhỏ menu
     MainFrame.Active = true
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
 
-    -- Viền phát sáng Neon màu xanh hacker đặc trưng của Libra
+    -- Viền phát sáng Neon màu xanh hacker
     local UIStroke = Instance.new("UIStroke", MainFrame)
     UIStroke.Color = Color3.fromRGB(0, 255, 100)
     UIStroke.Thickness = 1.5
     UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- 2. Thanh Tiêu đề gốc
+    -- 2. Thanh Tiêu đề (TopBar dùng để kéo thả)
     local TopBar = Instance.new("Frame", MainFrame)
     TopBar.Name = "TopBar"
     TopBar.Size = UDim2.new(1, 0, 0, 50)
@@ -55,15 +56,17 @@ function Library:CreateWindow(hubName)
     title.Font = Enum.Font.GothamBold
     title.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- TỰ ĐỘNG CHÈN NÚT TAM GIÁC ĐÓNG/MỞ NGAY SAU CHỮ BACBEO HUB
+    -- ========================================================
+    -- 🛠️ FIX LỖI 2: THÊM NÚT TAM GIÁC ĐÓNG MỞ CHUẨN GÓC PHẢI TOPBAR
+    -- ========================================================
     local ToggleBtn = Instance.new("TextButton", TopBar)
     ToggleBtn.Name = "ToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 30, 0, 30)
-    ToggleBtn.Position = UDim2.new(0, 210, 0, 10) -- Đặt vị trí ngay sau text tiêu đề
+    ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
+    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) -- Căn chuẩn góc phải trên cùng của Menu
     ToggleBtn.BackgroundTransparency = 1
     ToggleBtn.Text = "▼"
     ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
-    ToggleBtn.TextSize = 16
+    ToggleBtn.TextSize = 20
     ToggleBtn.Font = Enum.Font.SourceSansBold
 
     -- 3. Khung bên trái (Danh mục) và Khung bên phải (Tính năng)
@@ -91,22 +94,21 @@ function Library:CreateWindow(hubName)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     rightLayout.Padding = UDim.new(0, 8)
 
-    -- LOGIC CLICK NÚT TAM GIÁC: THU GỌN / MỞ RỘNG BẰNG TWEEN MƯỢT MÀ
+    -- LOGIC CLICK NÚT TAM GIÁC: CO GIÃN MENU LÊN XUỐNG BẰNG TWEEN MƯỢT MÀ
     local IsCollapsed = false
     local OriginalSize = UDim2.new(0, 550, 0, 380)
-    local CollapsedSize = UDim2.new(0, 550, 0, 50) -- Chỉ để lại thanh tiêu đề
+    local CollapsedSize = UDim2.new(0, 550, 0, 50) -- Thu nhỏ lại chỉ chừa đúng thanh tiêu đề
 
     ToggleBtn.MouseButton1Click:Connect(function()
         IsCollapsed = not IsCollapsed
         if IsCollapsed then
             ToggleBtn.Text = "▲"
-            -- Ẩn nội dung bên trong trước khi thu nhỏ
+            -- Ẩn nhanh danh sách tính năng để tạo hiệu ứng thu gọn không bị lỗi hiển thị chữ
             leftContainer.Visible = false
             rightContainer.Visible = false
             TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
         else
             ToggleBtn.Text = "▼"
-            -- Chờ khôi phục kích thước xong mới hiện lại nội dung nhằm tránh lỗi hiển thị
             local tween = TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
             tween:Play()
             tween.Completed:Connect(function()
@@ -118,7 +120,7 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- HỆ THỐNG KÉO THẢ GIAO DIỆN (DRAG)
+    -- HỆ THỐNG KÉO THẢ GIAO DIỆN CHUẨN (DRAG)
     local dragging, dragStart, startPos
     TopBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -135,7 +137,7 @@ function Library:CreateWindow(hubName)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
-    -- Phím tắt ẩn toàn bộ giao diện (RightControl)
+    -- Phím tắt ẩn hoàn toàn GUI khỏi màn hình bằng phím RightControl
     local isOpened = true
     UserInputService.InputBegan:Connect(function(input, gpe)
         if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
