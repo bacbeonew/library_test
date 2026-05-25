@@ -1,4 +1,3 @@
-
 local Library = {}
 
 function Library:CreateWindow(hubName)
@@ -48,12 +47,21 @@ function Library:CreateWindow(hubName)
     AvatarImg.Size = UDim2.new(0, 50, 0, 50)
     AvatarImg.Position = UDim2.new(0, 15, 0, 60)
     AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    AvatarImg.Image = Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
     Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0) -- Bo tròn ảnh đại diện
     
     local UserStroke = Instance.new("UIStroke", AvatarImg)
     UserStroke.Color = Color3.fromRGB(0, 255, 100)
     UserStroke.Thickness = 1.5
+
+    -- SỬA LỖI CHÍ MẠNG: Bọc việc lấy ảnh vào task.spawn để tránh bị treo code nếu Roblox lag không tải được ảnh
+    task.spawn(function()
+        local success, content = pcall(function()
+            return Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
+        end)
+        if success then
+            AvatarImg.Image = content
+        end
+    end)
 
     local WelcomeText = Instance.new("TextLabel", MainFrame)
     WelcomeText.Size = UDim2.new(0, 200, 0, 20)
