@@ -1,207 +1,66 @@
-local Library = {}
+-- ĐÂY LÀ ĐOẠN CODE CẦN SỬA BÊN TRONG FILE LIBRA CỦA ÔNG
+function library:CreateFolder(folderName)
+    local FolderFrame = Instance.new("Frame")
+    FolderFrame.Name = folderName .. "_Folder"
+    FolderFrame.Size = UDim2.new(1, 0, 0, 30) -- Mặc định ban đầu thu gọn (chỉ vừa chiều cao chữ)
+    FolderFrame.BackgroundTransparency = 1
+    FolderFrame.ClipsDescendants = true -- Bắt buộc phải có để giấu nút con khi thu nhỏ
+    FolderFrame.Parent = MainScrollFrame -- Hoặc cái khung chứa chính trong UI của bạn
 
-function Library:CreateWindow(hubName)
-    local CoreGui = game:GetService("CoreGui")
-    local UserInputService = game:GetService("UserInputService")
-    local TweenService = game:GetService("TweenService")
-    local Players = game:GetService("Players")
-    
-    -- TÍNH NĂNG: Tự động xóa bản cũ nếu có bản mới kích hoạt
-    local GuiName = "BacBeoDashboardPro"
-    local OldGui = CoreGui:FindFirstChild(GuiName) or Players.LocalPlayer:FindFirstChildOfClass("PlayerGui"):FindFirstChild(GuiName)
-    if OldGui then
-        OldGui:Destroy()
-        warn("Đã tắt phiên bản BacBeo HUB cũ để khởi chạy bản mới!")
-    end
+    -- Chuyển chữ xám thành TextButton để bấm được
+    local FolderTitle = Instance.new("TextButton")
+    FolderTitle.Size = UDim2.new(1, 0, 0, 30)
+    FolderTitle.BackgroundTransparency = 1
+    FolderTitle.Text = "[" .. folderName:upper() .. "]"
+    FolderTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+    FolderTitle.TextXAlignment = Enum.TextXAlignment.Left
+    FolderTitle.Font = Enum.Font.SourceSansBold
+    FolderTitle.TextSize = 18
+    FolderTitle.Parent = FolderFrame
 
-    local ScreenGui = Instance.new("ScreenGui", CoreGui)
-    ScreenGui.Name = GuiName
-
-    -- 1. Khung Main chính
-    local MainFrame = Instance.new("Frame", ScreenGui)
-    MainFrame.Size = UDim2.new(0, 420, 0, 320)
-    MainFrame.Position = UDim2.new(0.5, -210, 0.5, -160)
-    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15) -- Màu tối huyền bí
-    MainFrame.ClipsDescendants = true
-    Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12) -- Bo góc xịn hơn
-
-    -- Viền phát sáng Neon màu xanh hacker
-    local UIStroke = Instance.new("UIStroke", MainFrame)
-    UIStroke.Color = Color3.fromRGB(0, 255, 100)
-    UIStroke.Thickness = 2
-    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-
-    -- 2. Tiêu đề
-    local Title = Instance.new("TextLabel", MainFrame)
-    Title.Size = UDim2.new(1, 0, 0, 45)
-    Title.Text = "    " .. hubName
-    Title.TextColor3 = Color3.fromRGB(0, 255, 100)
-    Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    Title.Font = Enum.Font.Code
-    Title.TextSize = 18
-    Title.TextXAlignment = Enum.TextXAlignment.Left
-    Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
-
-    -- Tự động lấy Avatar chính chủ người đang dùng và hiện Tên
-    local AvatarImg = Instance.new("ImageLabel", MainFrame)
-    AvatarImg.Size = UDim2.new(0, 50, 0, 50)
-    AvatarImg.Position = UDim2.new(0, 15, 0, 60)
-    AvatarImg.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Instance.new("UICorner", AvatarImg).CornerRadius = UDim.new(1, 0) -- Bo tròn ảnh đại diện
-    
-    local UserStroke = Instance.new("UIStroke", AvatarImg)
-    UserStroke.Color = Color3.fromRGB(0, 255, 100)
-    UserStroke.Thickness = 1.5
-
-    -- SỬA LỖI CHÍ MẠNG: Bọc việc lấy ảnh vào task.spawn để tránh bị treo code nếu Roblox lag không tải được ảnh
-    task.spawn(function()
-        local success, content = pcall(function()
-            return Players:GetUserThumbnailAsync(Players.LocalPlayer.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size100x100)
-        end)
-        if success then
-            AvatarImg.Image = content
-        end
-    end)
-
-    local WelcomeText = Instance.new("TextLabel", MainFrame)
-    WelcomeText.Size = UDim2.new(0, 200, 0, 20)
-    WelcomeText.Position = UDim2.new(0, 75, 0, 75)
-    WelcomeText.Text = "Chào chủ nhân: " .. Players.LocalPlayer.Name
-    WelcomeText.Font = Enum.Font.Code
-    WelcomeText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    WelcomeText.TextSize = 14
-    WelcomeText.BackgroundTransparency = 1
-    WelcomeText.TextXAlignment = Enum.TextXAlignment.Left
-
-    -- 3. Khung chứa Folder
-    local Container = Instance.new("ScrollingFrame", MainFrame)
-    Container.Size = UDim2.new(1, -30, 1, -135)
-    Container.Position = UDim2.new(0, 15, 0, 125)
+    -- Khung chứa các nút con thực sự
+    local Container = Instance.new("Frame")
+    Container.Name = "Container"
+    Container.Size = UDim2.new(1, 0, 0, 0)
+    Container.Position = UDim2.new(0, 0, 0, 35)
     Container.BackgroundTransparency = 1
-    Container.ScrollBarThickness = 3
-    Container.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
-    Container.AutomaticCanvasSize = Enum.AutomaticSize.Y
-    local Layout = Instance.new("UIListLayout", Container)
-    Layout.Padding = UDim.new(0, 12) -- Đã update khoảng cách 12 chống dính chữ cực thoáng!
+    Container.Parent = FolderFrame
 
-    -- TÍNH NĂNG: Tạo nút tam giác ẩn/hiện menu (Thu gọn gọn gàng)
-    local ToggleBtn = Instance.new("TextButton", MainFrame)
-    ToggleBtn.Name = "ToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 30, 0, 30)
-    ToggleBtn.Position = UDim2.new(1, -35, 0, 7) -- Căn góc phải thanh tiêu đề cực chuẩn
-    ToggleBtn.BackgroundTransparency = 1
-    ToggleBtn.Text = "▼"
-    ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
-    ToggleBtn.TextSize = 18
-    ToggleBtn.Font = Enum.Font.SourceSansBold
+    local ListLayout = Instance.new("UIListLayout")
+    ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    ListLayout.Padding = UDim.new(0, 5)
+    ListLayout.Parent = Container
 
-    local IsCollapsed = false
-    ToggleBtn.MouseButton1Click:Connect(function()
-        IsCollapsed = not IsCollapsed
-        if IsCollapsed then
-            -- Thu gọn: Ẩn Avatar và nút bấm, đổi icon thành tam giác hướng lên, thu nhỏ MainFrame vừa khít thanh tiêu đề
-            Container.Visible = false
-            AvatarImg.Visible = false
-            WelcomeText.Visible = false
-            ToggleBtn.Text = "▲"
-            MainFrame.Size = UDim2.new(0, 420, 0, 45)
-        else
-            -- Mở rộng: Hiện lại toàn bộ giao diện như cũ
-            Container.Visible = true
-            AvatarImg.Visible = true
-            WelcomeText.Visible = true
-            ToggleBtn.Text = "▼"
-            MainFrame.Size = UDim2.new(0, 420, 0, 320)
-        end
+    -- Logic bấm vào chữ xám để xổ menu xuống mượt mà
+    local isOpened = false
+    FolderTitle.MouseButton1Click:Connect(function()
+        isOpened = not isOpened
+        local targetHeight = isOpened and ListLayout.AbsoluteContentSize.Y or 0
+        
+        local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+        game:GetService("TweenService"):Create(Container, tweenInfo, {Size = UDim2.new(1, 0, 0, targetHeight)}):Play()
+        game:GetService("TweenService"):Create(FolderFrame, tweenInfo, {Size = UDim2.new(1, 0, 0, targetHeight + 40)}):Play()
+        
+        FolderTitle.TextColor3 = isOpened and Color3.fromRGB(0, 255, 100) or Color3.fromRGB(150, 150, 150)
     end)
 
-    -- 4. Bảng thông tin góc phải hiển thị Game ID
-    local InfoFrame = Instance.new("Frame", ScreenGui)
-    InfoFrame.Size = UDim2.new(0, 190, 0, 45)
-    InfoFrame.Position = UDim2.new(1, -205, 0, 15)
-    InfoFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    InfoFrame.BackgroundTransparency = 0.4
-    Instance.new("UICorner", InfoFrame)
-    local InfoStroke = Instance.new("UIStroke", InfoFrame)
-    InfoStroke.Color = Color3.fromRGB(0, 255, 100)
-    InfoStroke.Thickness = 1
-
-    local InfoText = Instance.new("TextLabel", InfoFrame)
-    InfoText.Size = UDim2.new(1, -10, 1, -10)
-    InfoText.Position = UDim2.new(0, 5, 0, 5)
-    InfoText.Font = Enum.Font.Code
-    InfoText.TextColor3 = Color3.fromRGB(0, 255, 100)
-    InfoText.TextSize = 13
-    InfoText.BackgroundTransparency = 1
-    InfoText.Text = "Game ID: " .. game.PlaceId
-
-    -- KÉO THẢ
-    local dragging, dragStart, startPos
-    MainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true; dragStart = input.Position; startPos = MainFrame.Position
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-    end)
-
-    -- Phím tắt đóng/mở mượt mà bằng phím RightControl
-    local isOpened = true
-    UserInputService.InputBegan:Connect(function(input, gpe)
-        if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
-            isOpened = not isOpened
-            local targetSize = isOpened and UDim2.new(0, 420, 0, 320) or UDim2.new(0, 420, 0, 0)
-            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = targetSize}):Play()
-            -- Reset lại trạng thái nút bấm tam giác nếu người dùng ẩn bằng phím tắt
-            if not isOpened then
-                Container.Visible = false; AvatarImg.Visible = false; WelcomeText.Visible = false; ToggleBtn.Text = "▲"
-                IsCollapsed = true
-            else
-                Container.Visible = true; AvatarImg.Visible = true; WelcomeText.Visible = true; ToggleBtn.Text = "▼"
-                IsCollapsed = false
-            end
-        end
-    end)
-
-    -- LOGIC TẠO FOLDER VÀ BUTTON
-    local WindowActions = {}
-    function WindowActions:CreateFolder(folderName)
-        local Folder = Instance.new("Frame", Container)
-        Folder.Size = UDim2.new(1, 0, 0, 25); Folder.AutomaticSize = Enum.AutomaticSize.Y; Folder.BackgroundTransparency = 1
-        Instance.new("UIListLayout", Folder).Padding = UDim.new(0, 5)
-
-        local FolderTitle = Instance.new("TextLabel", Folder)
-        FolderTitle.Size = UDim2.new(1, 0, 0, 20)
-        FolderTitle.Text = "[" .. folderName:upper() .. "]"
-        FolderTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
-        FolderTitle.Font = Enum.Font.Code; FolderTitle.TextSize = 14
-        FolderTitle.BackgroundTransparency = 1; FolderTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-        local FolderActions = {}
-        function FolderActions:CreateButton(btnName, callback)
-            local Button = Instance.new("TextButton", Folder)
-            Button.Size = UDim2.new(1, 0, 0, 38); Button.Text = btnName; Button.Font = Enum.Font.Code; Button.TextSize = 14
-            Button.BackgroundColor3 = Color3.fromRGB(28, 28, 28); Button.TextColor3 = Color3.new(1, 1, 1)
-            Instance.new("UICorner", Button).CornerRadius = UDim.new(0, 6)
-            
-            local BtnStroke = Instance.new("UIStroke", Button)
-            BtnStroke.Color = Color3.fromRGB(50, 50, 50)
-            BtnStroke.Thickness = 1
-
-            Button.MouseEnter:Connect(function() BtnStroke.Color = Color3.fromRGB(0, 255, 100) end)
-            Button.MouseLeave:Connect(function() BtnStroke.Color = Color3.fromRGB(50, 50, 50) end)
-            Button.MouseButton1Click:Connect(callback)
-        end
-        return FolderActions
+    -- Trả về một bảng chứa các hàm tạo nút, nhưng mục tiêu ép vào 'Container' thay vì FolderFrame cũ
+    local elements = {}
+    
+    function elements:Button(text, callback)
+        -- Code tạo Button của libra cũ...
+        -- Nhưng thay vì đặt Parent = FolderFrame, hãy sửa thành Parent = Container
     end
-    return WindowActions
-end
+    
+    function elements:Toggle(text, callback)
+        -- Code tạo Toggle của libra cũ...
+        -- Thay vì đặt Parent = FolderFrame, hãy sửa thành Parent = Container
+    end
 
-return Library
+    function elements:Box(text, datatype, callback)
+        -- Code tạo Box của libra cũ...
+        -- Thay vì đặt Parent = FolderFrame, hãy sửa thành Parent = Container
+    end
+
+    return elements
+end
