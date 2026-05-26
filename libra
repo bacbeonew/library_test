@@ -13,7 +13,6 @@ function Library:CreateWindow(hubName)
     local function CleanOldGUIs(parent)
         if parent then
             for _, child in pairs(parent:GetChildren()) do
-                -- Quét tất cả các UI có tên chứa từ khóa của BacBeo Hub để diệt tận gốc
                 if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
                     child:Destroy()
                 end
@@ -21,37 +20,34 @@ function Library:CreateWindow(hubName)
         end
     end
     
-    -- Tiến hành càn quét trên mọi môi trường lưu trữ UI của Roblox
     CleanOldGUIs(CoreGui)
     CleanOldGUIs(PlayerGui)
     if game:GetService("GuiService") then CleanOldGUIs(game:GetService("GuiService")) end
 
-    -- Đặt tên định danh mới đồng bộ cho bản này
     local GuiName = "BacBeoHub_Official_Lybra"
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
 
-    -- 1. Khung Main chính gốc (Chuẩn bo góc viền Neon xanh lá)
+    -- 1. Khung Main chính gốc
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
     MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = true -- Không cho chữ tràn ra ngoài khi thu nhỏ
+    MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
 
-    -- Viền phát sáng Neon màu xanh hacker chuẩn chỉ
     local UIStroke = Instance.new("UIStroke", MainFrame)
     UIStroke.Color = Color3.fromRGB(0, 255, 100)
     UIStroke.Thickness = 1.5
     UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- 2. Thanh Tiêu đề (TopBar hỗ trợ kéo thả)
+    -- 2. Thanh Tiêu đề (TopBar)
     local TopBar = Instance.new("Frame", MainFrame)
     TopBar.Name = "TopBar"
     TopBar.Size = UDim2.new(1, 0, 0, 50)
@@ -67,20 +63,17 @@ function Library:CreateWindow(hubName)
     title.Font = Enum.Font.GothamBold
     title.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- ========================================================
-    -- 🛠️ NÚT TAM GIÁC ĐÓNG MỞ (Cố định chuẩn góc phải thanh tiêu đề)
-    -- ========================================================
     local ToggleBtn = Instance.new("TextButton", TopBar)
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
-    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) -- Neo chuẩn góc phải trên cùng
+    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) 
     ToggleBtn.BackgroundTransparency = 1
     ToggleBtn.Text = "▼"
     ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
     ToggleBtn.TextSize = 20
     ToggleBtn.Font = Enum.Font.SourceSansBold
 
-    -- 3. Khung bên trái (Danh mục) và Khung bên phải (Tính năng)
+    -- 3. Khung bên trái và Khung bên phải
     local leftContainer = Instance.new("Frame", MainFrame)
     leftContainer.Name = "LeftContainer"
     leftContainer.Size = UDim2.new(0, 150, 1, -65)
@@ -105,10 +98,10 @@ function Library:CreateWindow(hubName)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     rightLayout.Padding = UDim.new(0, 8)
 
-    -- LOGIC CLICK NÚT TAM GIÁC: CO GIÃN MENU MƯỢT MÀ
+    -- LOGIC CLICK NÚT TAM GIÁC
     local IsCollapsed = false
     local OriginalSize = UDim2.new(0, 550, 0, 380)
-    local CollapsedSize = UDim2.new(0, 550, 0, 50) -- Thu nhỏ lên sát thanh tiêu đề
+    local CollapsedSize = UDim2.new(0, 550, 0, 50) 
 
     ToggleBtn.MouseButton1Click:Connect(function()
         IsCollapsed = not IsCollapsed
@@ -130,22 +123,51 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- HỆ THỐNG KÉO THẢ GIAO DIỆN CHUẨN (DRAG)
-    local dragging, dragStart, startPos
+    -- ========================================================
+    -- 📱 HỆ THỐNG KÉO THẢ ĐA NỀN TẢNG (HỖ TRỢ ĐIỆN THOẠI + PC)
+    -- ========================================================
+    local dragging = false
+    local dragInput, dragStart, startPos
+
+    local function updateDrag(input)
+        local delta = input.Position - dragStart
+        MainFrame.Position = UDim2.new(
+            startPos.X.Scale, 
+            startPos.X.Offset + delta.X, 
+            startPos.Y.Scale, 
+            startPos.Y.Offset + delta.Y
+        )
+    end
+
     TopBar.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true; dragStart = input.Position; startPos = MainFrame.Position
+        -- Kiểm tra nếu người dùng Click chuột trái (PC) HOẶC chạm ngón tay vào màn hình (Mobile)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = MainFrame.Position
+
+            -- Lắng nghe khi người dùng bỏ tay ra hoặc nhả chuột
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end)
+
+    TopBar.InputChanged:Connect(function(input)
+        -- Kiểm tra trạng thái di chuyển của chuột hoặc ngón tay vuốt
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStart
-            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        if input == dragInput and dragging then
+            updateDrag(input)
         end
     end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
-    end)
+    -- ========================================================
 
     -- Phím tắt ẩn hoàn toàn GUI khỏi màn hình (RightControl)
     local isOpened = true
