@@ -8,30 +8,44 @@ local VITRI_BANDAU = UDim2.new(0.02, 0, 0.5, 0)
 -- ========================================================
 
 function Library:CreateWindow(hubName)
+    -- ⏳ ĐỢI GAME LOAD XONG HOÀN TOÀN ĐỂ TRÁNH LỖI MẤT UI
+    if not game:IsLoaded() then
+        game.Loaded:Wait()
+    end
+
     local CoreGui = game:GetService("CoreGui")
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
     local RunService = game:GetService("RunService")
+    local Players = game:GetService("Players")
     
+    -- Đảm bảo người chơi đã load xong nhân vật
+    local localPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait() or Players.LocalPlayer
+    if not localPlayer.Character then
+        localPlayer.CharacterAdded:Wait()
+    end
+
     -- ========================================================
-    -- 🧹 BƯỚC 1: DỌN SẠCH TẬN GỐC UI CŨ TRƯỚC KHI TẠO UI MỚI
+    -- 🧹 DỌN SẠCH TẬN GỐC UI CŨ TRƯỚC KHI TẠO UI MỚI
     -- ========================================================
     local GuiName = "BacBeoHub_Official_UI"
     for _, child in pairs(CoreGui:GetChildren()) do
         if child:IsA("ScreenGui") and (child.Name == GuiName or string.find(child.Name, "BacBeoHub")) then
-            child:Destroy()
+            pcall(function() child:Destroy() end)
         end
     end
 
-    -- Khởi tạo ScreenGui mới
-    local ScreenGui = Instance.new("ScreenGui", CoreGui)
+    -- Khởi tạo ScreenGui mới trực tiếp vào CoreGui
+    local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.Parent = CoreGui
 
     -- ========================================================
-    -- 📦 BƯỚC 2: TẠO KHUNG MAIN CHÍNH (ÉP BUỘC HIỆN NGAY TỪ ĐẦU)
+    -- 📦 TẠO KHUNG MAIN CHÍNH (ÉP BUỘC HIỆN VÀ ĐÈ LÊN TRÊN CÙNG)
     -- ========================================================
-    local MainFrame = Instance.new("Frame", ScreenGui)
+    local MainFrame = Instance.new("Frame")
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
     MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
@@ -39,7 +53,9 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = true -- Đảm bảo luôn hiện khi bật script
+    MainFrame.Visible = true 
+    MainFrame.ZIndex = 10 -- Đảm bảo nằm trên các layer khác
+    MainFrame.Parent = ScreenGui
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -153,21 +169,21 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 BƯỚC 3: NÚT MINI LOGO TRÒN (KHÔNG CHỮ BB)
+    -- 🔘 NÚT MINI LOGO TRÒN (CAM KẾT KHÔNG CHỮ BB)
     -- ========================================================
     local isOpened = true
 
     local MiniLogo = Instance.new("ImageButton")
     MiniLogo.Name = "BacBeo_MiniLogo_RGB"
-    MiniLogo.Parent = ScreenGui
     MiniLogo.Size = UDim2.new(0, 55, 0, 55)
     MiniLogo.AnchorPoint = Vector2.new(0, 0.5) 
     MiniLogo.Position = VITRI_BANDAU
     MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MiniLogo.Image = "rbxassetid://100698867542221"
-    MiniLogo.Visible = false -- Ban đầu ẩn đi vì MainFrame đang hiện công khai
+    MiniLogo.Visible = false -- Ban đầu ẩn vì MainFrame mở sẵn
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
+    MiniLogo.Parent = ScreenGui
 
     local logoCorner = Instance.new("UICorner", MiniLogo)
     logoCorner.CornerRadius = UDim.new(1, 0)
@@ -176,7 +192,7 @@ function Library:CreateWindow(hubName)
     stroke.Thickness = 2.5
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- Vòng lặp đổi màu cầu vồng (RGB) viền nút tròn
+    -- Vòng lặp đổi màu cầu vồng (RGB)
     local tickCounter = 0
     RunService.RenderStepped:Connect(function(deltaTime)
         tickCounter = tickCounter + deltaTime
@@ -197,7 +213,7 @@ function Library:CreateWindow(hubName)
         MiniLogo.Visible = not isOpened
     end
 
-    -- Kéo thả nút tròn độc lập
+    -- Kéo thả nút tròn
     local logoDragging = false
     local logoDragStart, logoStartPos
     local mouseStartPos = Vector3.new(0, 0, 0)
@@ -234,7 +250,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- ⌨️ BƯỚC 4: KHÓA PHÍM TẮT "H-U-B" KHI LOGO TRÒN ĐANG HIỆN
+    -- ⌨️ TỔ HỢP PHÍM PHÍM TẮT "H-U-B" (KHÓA KHI ĐANG HIỆN LOGO TRÒN)
     -- ========================================================
     local keySequence = {}
     local targetSequence = {"H", "U", "B"}
@@ -243,7 +259,7 @@ function Library:CreateWindow(hubName)
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end 
         
-        -- Nếu nút tròn đang mở -> khóa hoàn toàn tính năng tổ hợp phím tắt
+        -- Nếu nút tròn đang bật -> Khóa phím tắt hoàn toàn
         if MiniLogo.Visible == true then 
             return 
         end
