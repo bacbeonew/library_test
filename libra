@@ -1,5 +1,20 @@
 local Library = {}
 
+-- ========================================================
+-- ⚙️ KHU VỰC CẤU HÌNH VỊ TRÍ ĐẦU TIÊN CỦA NÚT TRÒN TRÊN MÀN HÌNH
+-- ========================================================
+-- Hướng dẫn chỉnh tọa độ UDim2.new(ScaleX, OffsetX, ScaleY, OffsetY)
+-- Tỷ lệ (Scale) chạy từ 0 đến 1 (Ví dụ: 0 là bên trái/trên cùng, 1 là bên phải/dưới cùng)
+-- Cách chỉnh nhanh:
+--   - Góc TRÊN bên PHẢI:  UDim2.new(0.95, 0, 0.1, 0)
+--   - Góc GIỮA bên PHẢI:  UDim2.new(0.95, 0, 0.5, 0)
+--   - Góc DƯỚI bên PHẢI:  UDim2.new(0.95, 0, 0.85, 0)
+--   - Góc GIỮA bên TRÁI:  UDim2.new(0.02, 0, 0.5, 0)
+
+local VITRI_BANDAU = UDim2.new(0.95, 0, 0.4, 0) -- 🌟 ÔNG THAY ĐỔI TỌA ĐỘ NÚT TRÒN TẠI ĐÂY NHÉ!
+
+-- ========================================================
+
 function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
     local UserInputService = game:GetService("UserInputService")
@@ -9,23 +24,24 @@ function Library:CreateWindow(hubName)
     local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
     
     -- ========================================================
-    -- 🚨 ANTI-DUPLICATE ĐÃ ĐƯỢC NÂNG CẤP: XÓA SẠCH BẢN CŨ VÀ ĐỔI TÊN GUI
+    -- 🚨 ÉP XOÁ BẢN CŨ BẰNG CÁCH QUÉT SẠCH TẤT CẢ GAME GUI
     -- ========================================================
-    local function CleanOldGUIs(parent)
-        if parent then
-            for _, child in pairs(parent:GetChildren()) do
-                if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
-                    child:Destroy()
+    local function ForceClean()
+        local targets = {CoreGui, PlayerGui}
+        for _, parent in pairs(targets) do
+            if parent then
+                for _, child in pairs(parent:GetChildren()) do
+                    if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
+                        child:Destroy()
+                    end
                 end
             end
         end
     end
-    
-    CleanOldGUIs(CoreGui)
-    CleanOldGUIs(PlayerGui)
+    ForceClean()
 
-    -- Đổi tên định danh mới hoàn toàn để không dính cache màu cũ
-    local GuiName = "BacBeoHub_VipRGB_NewEdition"
+    -- Đặt tên tên ngẫu nhiên để lách bộ nhớ đệm (Cache UI) của Roblox
+    local GuiName = "BacBeoHub_RGB_Vippro_" .. tostring(math.random(100, 999))
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
@@ -153,18 +169,17 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (FIX GÓC PHẢI TUYỆT ĐỐI + RGB)
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (VIỀN CẦU VỒNG RGB)
     -- ========================================================
     local isOpened = true
 
     local MiniLogo = Instance.new("ImageButton")
-    MiniLogo.Name = "BacBeo_MiniLogo_RGB"
+    MiniLogo.Name = "BacBeo_MiniLogo_Dynamic"
     MiniLogo.Parent = ScreenGui
     MiniLogo.Size = UDim2.new(0, 52, 0, 52)
     
-    -- 🎯 FIX VỊ TRÍ GÓC PHẢI CHUẨN XÁC BẰNG ANCHOR POINT
-    MiniLogo.AnchorPoint = Vector2.new(1, 0.5) -- Đặt tâm bên phải để dính chặt lề phải
-    MiniLogo.Position = UDim2.new(0.985, 0, 0.5, 0) -- Nằm sát lề phải màn hình 
+    -- 🎯 SỬ DỤNG VỊ TRÍ ĐƯỢC CHỈNH Ở KHU VỰC CONFIG ĐẦU SCRIPT
+    MiniLogo.Position = VITRI_BANDAU
     
     MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     MiniLogo.Image = "rbxassetid://100698867542221"
@@ -190,14 +205,14 @@ function Library:CreateWindow(hubName)
     Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
     
     local stroke = Instance.new("UIStroke", MiniLogo)
-    stroke.Thickness = 2.5 -- Cho viền dày lên một chút nhìn hiệu ứng cầu vồng rõ hơn
+    stroke.Thickness = 3.0 -- Viền dày hẳn lên để nhìn rõ dải cầu vồng đổi màu liên tục
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- 🌈 VÒNG LẶP LIÊN TỤC ĐỔI MÀU CẦU VỒNG (RGB) CỦA VIỀN
+    -- 🌈 HỆ THỐNG LIÊN TỤC QUÉT ĐỔI MÀU CẦU VỒNG CHỐNG TRÙNG LẶP
     local tickCounter = 0
     RunService.RenderStepped:Connect(function(deltaTime)
         tickCounter = tickCounter + deltaTime
-        local hue = (tickCounter * 0.4) % 1 -- Thay đổi 0.4 để màu chạy nhanh hay chậm
+        local hue = (tickCounter * 0.5) % 1 -- 0.5 là tốc độ mượt mà đổi màu
         stroke.Color = Color3.fromHSV(hue, 1, 1)
     end)
 
@@ -207,7 +222,7 @@ function Library:CreateWindow(hubName)
         MiniLogo.Visible = not isOpened
     end
 
-    -- Hệ thống kéo thả chống lỗi click nhầm
+    -- Kéo thả tự do không lỗi
     local logoDragging = false
     local logoDragStart, logoStartPos
     local mouseStartPos = Vector3.new(0, 0, 0)
@@ -228,8 +243,6 @@ function Library:CreateWindow(hubName)
     UserInputService.InputChanged:Connect(function(input)
         if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - logoDragStart
-            -- Khi kéo thả, hủy AnchorPoint tạm thời để tính toán tọa độ Offset tự do mượt mà
-            MiniLogo.AnchorPoint = Vector2.new(0, 0)
             MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
         end
     end)
