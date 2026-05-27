@@ -1,105 +1,642 @@
 local Library = {}
 
+
+
 function Library:CreateWindow(hubName)
+
     local CoreGui = game:GetService("CoreGui")
+
     local UserInputService = game:GetService("UserInputService")
+
     local TweenService = game:GetService("TweenService")
-    local RunService = game:GetService("RunService")
+
     local Players = game:GetService("Players")
+
     local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
+
     
+
     -- ========================================================
+
     -- 🚨 MÁY QUÉT TẬN GỐC: XÓA SẠCH TẤT CẢ BẢN SAO TRÙNG LẶP (ANTI-DUPLICATE)
+
     -- ========================================================
+
     local function CleanOldGUIs(parent)
+
         if parent then
+
             for _, child in pairs(parent:GetChildren()) do
+
                 if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
+
                     child:Destroy()
+
                 end
+
             end
+
         end
+
     end
+
     
+
     CleanOldGUIs(CoreGui)
+
     CleanOldGUIs(PlayerGui)
+
     if game:GetService("GuiService") then CleanOldGUIs(game:GetService("GuiService")) end
 
-    -- Tạo ScreenGui chính gắn vào CoreGui để không bị mất khi chết (ResetOnSpawn = false)
+
+
     local GuiName = "BacBeoHub_Official_Lybra"
+
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
+
     ScreenGui.Name = GuiName
+
     ScreenGui.ResetOnSpawn = false
 
-    -- 1. Khung Main Giao diện chính
+
+
+    -- 1. Khung Main chính gốc
+
     local MainFrame = Instance.new("Frame", ScreenGui)
+
     MainFrame.Name = "Main"
+
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
+
     MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
+
     MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
     MainFrame.BorderSizePixel = 0
+
     MainFrame.ClipsDescendants = true 
+
     MainFrame.Active = true
 
+
+
     local corner = Instance.new("UICorner", MainFrame)
+
     corner.CornerRadius = UDim.new(0, 10)
 
+
+
     local UIStroke = Instance.new("UIStroke", MainFrame)
+
     UIStroke.Color = Color3.fromRGB(0, 255, 100)
+
     UIStroke.Thickness = 1.5
+
     UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
+
+
     -- 2. Thanh Tiêu đề (TopBar)
+
     local TopBar = Instance.new("Frame", MainFrame)
+
     TopBar.Name = "TopBar"
+
     TopBar.Size = UDim2.new(1, 0, 0, 50)
+
     TopBar.BackgroundTransparency = 1
 
+
+
     local title = Instance.new("TextLabel", TopBar)
+
     title.Size = UDim2.new(0, 250, 1, 0)
+
     title.Position = UDim2.new(0, 20, 0, 0)
+
     title.BackgroundTransparency = 1
+
     title.Text = hubName
+
     title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
     title.TextSize = 22
+
     title.Font = Enum.Font.GothamBold
+
     title.TextXAlignment = Enum.TextXAlignment.Left
 
+
+
     local ToggleBtn = Instance.new("TextButton", TopBar)
+
     ToggleBtn.Name = "ToggleBtn"
+
     ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
+
     ToggleBtn.Position = UDim2.new(1, -45, 0, 7) 
+
     ToggleBtn.BackgroundTransparency = 1
+
     ToggleBtn.Text = "▼"
+
     ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+
     ToggleBtn.TextSize = 20
+
     ToggleBtn.Font = Enum.Font.SourceSansBold
 
-    -- 3. Khung chứa Danh mục (Trái) và Khung chứa Tính năng (Phải)
+
+
+    -- 3. Khung bên trái và Khung bên phải
+
     local leftContainer = Instance.new("Frame", MainFrame)
+
     leftContainer.Name = "LeftContainer"
+
     leftContainer.Size = UDim2.new(0, 150, 1, -65)
+
     leftContainer.Position = UDim2.new(0, 10, 0, 55)
+
     leftContainer.BackgroundTransparency = 1
 
+
+
     local leftLayout = Instance.new("UIListLayout", leftContainer)
+
     leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
     leftLayout.Padding = UDim.new(0, 8)
 
+
+
     local rightContainer = Instance.new("ScrollingFrame", MainFrame)
+
     rightContainer.Name = "RightContainer"
+
     rightContainer.Size = UDim2.new(1, -180, 1, -65)
+
     rightContainer.Position = UDim2.new(0, 170, 0, 55)
+
     rightContainer.BackgroundTransparency = 1
+
     rightContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+
     rightContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
     rightContainer.ScrollBarThickness = 3
+
     rightContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
 
+
+
     local rightLayout = Instance.new("UIListLayout", rightContainer)
+
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
     rightLayout.Padding = UDim.new(0, 8)
 
-    -- LOGIC CLICK NÚT TAM GIÁC THU GỌN TOPBAR
+
+
+    -- LOGIC CLICK NÚT TAM GIÁC
+
     local IsCollapsed = false
-    local OriginalSize = UDim2.
+
+    local OriginalSize = UDim2.new(0, 550, 0, 380)
+
+    local CollapsedSize = UDim2.new(0, 550, 0, 50) 
+
+
+
+    ToggleBtn.MouseButton1Click:Connect(function()
+
+        IsCollapsed = not IsCollapsed
+
+        if IsCollapsed then
+
+            ToggleBtn.Text = "▲"
+
+            leftContainer.Visible = false
+
+            rightContainer.Visible = false
+
+            TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
+
+        else
+
+            ToggleBtn.Text = "▼"
+
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
+
+            tween:Play()
+
+            tween.Completed:Connect(function()
+
+                if not IsCollapsed then
+
+                    leftContainer.Visible = true
+
+                    rightContainer.Visible = true
+
+                end
+
+            end)
+
+        end
+
+    end)
+
+
+
+    -- ========================================================
+
+    -- 📱 HỆ THỐNG KÉO THẢ ĐA NỀN TẢNG (HỖ TRỢ ĐIỆN THOẠI + PC)
+
+    -- ========================================================
+
+    local dragging = false
+
+    local dragInput, dragStart, startPos
+
+
+
+    local function updateDrag(input)
+
+        local delta = input.Position - dragStart
+
+        MainFrame.Position = UDim2.new(
+
+            startPos.X.Scale, 
+
+            startPos.X.Offset + delta.X, 
+
+            startPos.Y.Scale, 
+
+            startPos.Y.Offset + delta.Y
+
+        )
+
+    end
+
+
+
+    TopBar.InputBegan:Connect(function(input)
+
+        -- Kiểm tra nếu người dùng Click chuột trái (PC) HOẶC chạm ngón tay vào màn hình (Mobile)
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+
+            dragging = true
+
+            dragStart = input.Position
+
+            startPos = MainFrame.Position
+
+
+
+            -- Lắng nghe khi người dùng bỏ tay ra hoặc nhả chuột
+
+            input.Changed:Connect(function()
+
+                if input.UserInputState == Enum.UserInputState.End then
+
+                    dragging = false
+
+                end
+
+            end)
+
+        end
+
+    end)
+
+
+
+    TopBar.InputChanged:Connect(function(input)
+
+        -- Kiểm tra trạng thái di chuyển của chuột hoặc ngón tay vuốt
+
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+
+            dragInput = input
+
+        end
+
+    end)
+
+
+
+    UserInputService.InputChanged:Connect(function(input)
+
+        if input == dragInput and dragging then
+
+            updateDrag(input)
+
+        end
+
+    end)
+
+    -- ========================================================
+
+
+
+    -- Phím tắt ẩn hoàn toàn GUI khỏi màn hình (RightControl)
+
+    local isOpened = true
+
+    UserInputService.InputBegan:Connect(function(input, gpe)
+
+        if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
+
+            isOpened = not isOpened
+
+            ScreenGui.Enabled = isOpened
+
+        end
+
+    end)
+
+
+
+    local isFirstFolder = true
+
+
+
+    -- LOGIC TẠO DANH MỤC VÀ TÍNH NĂNG CON
+
+    local windowMethods = {}
+
+    function windowMethods:CreateFolder(folderName)
+
+        local folderBtn = Instance.new("TextButton", leftContainer)
+
+        folderBtn.Size = UDim2.new(1, 0, 0, 36)
+
+        folderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+        folderBtn.Text = "  " .. folderName
+
+        folderBtn.TextColor3 = Color3.fromRGB(160, 160, 160)
+
+        folderBtn.TextSize = 14
+
+        folderBtn.Font = Enum.Font.SourceSansBold
+
+        folderBtn.TextXAlignment = Enum.TextXAlignment.Left
+
+
+
+        local btnCorner = Instance.new("UICorner", folderBtn)
+
+        btnCorner.CornerRadius = UDim.new(0, 6)
+
+
+
+        local featureFrame = Instance.new("Frame", rightContainer)
+
+        featureFrame.Size = UDim2.new(1, 0, 0, 0)
+
+        featureFrame.AutomaticSize = Enum.AutomaticSize.Y
+
+        featureFrame.BackgroundTransparency = 1
+
+        featureFrame.Visible = isFirstFolder
+
+
+
+        local featureLayout = Instance.new("UIListLayout", featureFrame)
+
+        featureLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+        featureLayout.Padding = UDim.new(0, 6)
+
+
+
+        if isFirstFolder then
+
+            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+
+            isFirstFolder = false
+
+        end
+
+
+
+        folderBtn.MouseButton1Click:Connect(function()
+
+            for _, f in pairs(rightContainer:GetChildren()) do
+
+                if f:IsA("Frame") then f.Visible = false end
+
+            end
+
+            for _, b in pairs(leftContainer:GetChildren()) do
+
+                if b:IsA("TextButton") then b.TextColor3 = Color3.fromRGB(160, 160, 160) end
+
+            end
+
+            featureFrame.Visible = true
+
+            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+
+        end)
+
+
+
+        local itemMethods = {}
+
+
+
+        function itemMethods:Button(text, callback)
+
+            local btn = Instance.new("TextButton", featureFrame)
+
+            btn.Size = UDim2.new(1, -5, 0, 34)
+
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+
+            btn.Text = text
+
+            btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+
+            btn.Font = Enum.Font.SourceSansSemibold
+
+            btn.TextSize = 15
+
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+
+
+
+            btn.MouseButton1Click:Connect(callback)
+
+            return btn
+
+        end
+
+
+
+        function itemMethods:Toggle(text, callback)
+
+            local state = false
+
+            local tFrame = Instance.new("Frame", featureFrame)
+
+            tFrame.Size = UDim2.new(1, -5, 0, 36)
+
+            tFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+
+            Instance.new("UICorner", tFrame).CornerRadius = UDim.new(0, 5)
+
+
+
+            local lbl = Instance.new("TextLabel", tFrame)
+
+            lbl.Size = UDim2.new(1, -60, 1, 0)
+
+            lbl.Position = UDim2.new(0, 10, 0, 0)
+
+            lbl.BackgroundTransparency = 1
+
+            lbl.Text = text
+
+            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+
+            lbl.Font = Enum.Font.SourceSans
+
+            lbl.TextSize = 15
+
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+
+
+            local btn = Instance.new("TextButton", tFrame)
+
+            btn.Size = UDim2.new(0, 40, 0, 22)
+
+            btn.Position = UDim2.new(1, -50, 0.5, -11)
+
+            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+
+            btn.Text = ""
+
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 11)
+
+
+
+            local circle = Instance.new("Frame", btn)
+
+            circle.Size = UDim2.new(0, 16, 0, 16)
+
+            circle.Position = UDim2.new(0, 3, 0.5, -8)
+
+            circle.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+
+            Instance.new("UICorner", circle).CornerRadius = UDim.new(0, 8)
+
+
+
+            btn.MouseButton1Click:Connect(function()
+
+                state = not state
+
+                if state then
+
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
+
+                    circle.Position = UDim2.new(1, -19, 0.5, -8)
+
+                else
+
+                    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+
+                    circle.Position = UDim2.new(0, 3, 0.5, -8)
+
+                end
+
+                callback(state)
+
+            end)
+
+        end
+
+
+
+        function itemMethods:Box(text, datatype, callback)
+
+            local bFrame = Instance.new("Frame", featureFrame)
+
+            bFrame.Size = UDim2.new(1, -5, 0, 36)
+
+            bFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+
+            Instance.new("UICorner", bFrame).CornerRadius = UDim.new(0, 5)
+
+
+
+            local lbl = Instance.new("TextLabel", bFrame)
+
+            lbl.Size = UDim2.new(1, -100, 1, 0)
+
+            lbl.Position = UDim2.new(0, 10, 0, 0)
+
+            lbl.BackgroundTransparency = 1
+
+            lbl.Text = text
+
+            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+
+            lbl.Font = Enum.Font.SourceSans
+
+            lbl.TextSize = 15
+
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+
+
+            local box = Instance.new("TextBox", bFrame)
+
+            box.Size = UDim2.new(0, 80, 0, 24)
+
+            box.Position = UDim2.new(1, -90, 0.5, -12)
+
+            box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+
+            box.Text = ""
+
+            box.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+            box.Font = Enum.Font.SourceSans
+
+            box.TextSize = 14
+
+            Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
+
+
+
+            box.FocusLost:Connect(function()
+
+                local val = box.Text
+
+                if datatype == "number" then val = tonumber(val) or 0 end
+
+                callback(val)
+
+            end)
+
+        end
+
+
+
+        return itemMethods
+
+    end
+
+    return windowMethods
+
+end
+
+
+
+return Library
+
