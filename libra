@@ -14,14 +14,11 @@ function Library:CreateWindow(hubName)
     local RunService = game:GetService("RunService")
     
     -- ========================================================
-    -- 🧹 ĐOẠN MÃ QUÉT SẠCH TẬN GỐC CÁC NÚT CŨ BỊ KẸT (CÓ CHỮ BB)
+    -- 🧹 ĐOẠN MÃ QUYẾT LIỆT: XÓA SẠCH BẤT CỨ UI CŨ NÀO ĐANG CHẠY NGẦM
     -- ========================================================
     for _, child in pairs(CoreGui:GetChildren()) do
-        if child:IsA("ScreenGui") then
-            -- Xóa dựa theo tên cũ hoặc nếu bên trong nó chứa nút MiniLogo cũ
-            if string.find(child.Name, "BacBeoHub") or child:FindFirstChild("BacBeo_MiniLogo_RGB", true) then
-                child:Destroy()
-            end
+        if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeoHub") or child.Name == "BacBeoHub_Official_UI") then
+            child:Destroy()
         end
     end
 
@@ -138,3 +135,66 @@ function Library:CreateWindow(hubName)
             dragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            end)
+        end
+    end)
+
+    TopBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+    end)
+
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then updateDrag(input) end
+    end)
+
+    -- ========================================================
+    -- 🔘 NÚT MINI LOGO TRÒN (TUYỆT ĐỐI KHÔNG CHỮ BB)
+    -- ========================================================
+    local isOpened = true
+
+    local MiniLogo = Instance.new("ImageButton")
+    MiniLogo.Name = "BacBeo_MiniLogo_RGB"
+    MiniLogo.Parent = ScreenGui
+    MiniLogo.Size = UDim2.new(0, 55, 0, 55)
+    MiniLogo.AnchorPoint = Vector2.new(0, 0.5) 
+    MiniLogo.Position = VITRI_BANDAU
+    MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MiniLogo.Image = "rbxassetid://100698867542221"
+    MiniLogo.Visible = false -- Ban đầu ẩn vì Main đang mở công khai
+    MiniLogo.ZIndex = 100000
+    MiniLogo.Active = true
+
+    local logoCorner = Instance.new("UICorner", MiniLogo)
+    logoCorner.CornerRadius = UDim.new(1, 0)
+
+    local stroke = Instance.new("UIStroke", MiniLogo)
+    stroke.Thickness = 2.5
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    -- Vòng lặp đổi màu cầu vồng (RGB) viền nút tròn
+    local tickCounter = 0
+    RunService.RenderStepped:Connect(function(deltaTime)
+        tickCounter = tickCounter + deltaTime
+        local hue = (tickCounter * 0.4) % 1
+        stroke.Color = Color3.fromHSV(hue, 1, 1)
+    end)
+
+    MiniLogo.MouseEnter:Connect(function()
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
+    end)
+    MiniLogo.MouseLeave:Connect(function()
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+    end)
+
+    local function ToggleMainUI(state)
+        isOpened = state
+        MainFrame.Visible = isOpened
+        MiniLogo.Visible = not isOpened
+    end
+
+    -- Kéo thả nút tròn độc lập
+    local logoDragging = false
+    local logoDragStart, logoStartPos
+    local mouseStartPos = Vector3.new(0
