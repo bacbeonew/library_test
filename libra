@@ -9,7 +9,7 @@ function Library:CreateWindow(hubName)
     local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
     
     -- ========================================================
-    -- 🚨 ANTI-DUPLICATE: XÓA SẠCH TẤT CẢ BẢN SAO TRÙNG LẶP
+    -- 🚨 ANTI-DUPLICATE ĐÃ ĐƯỢC NÂNG CẤP: XÓA SẠCH BẢN CŨ VÀ ĐỔI TÊN GUI
     -- ========================================================
     local function CleanOldGUIs(parent)
         if parent then
@@ -23,9 +23,9 @@ function Library:CreateWindow(hubName)
     
     CleanOldGUIs(CoreGui)
     CleanOldGUIs(PlayerGui)
-    if game:GetService("GuiService") then CleanOldGUIs(game:GetService("GuiService")) end
 
-    local GuiName = "BacBeoHub_Official_Lybra"
+    -- Đổi tên định danh mới hoàn toàn để không dính cache màu cũ
+    local GuiName = "BacBeoHub_VipRGB_NewEdition"
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
@@ -39,7 +39,7 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = true -- Mặc định ban đầu hiện HUB lớn
+    MainFrame.Visible = true 
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -65,7 +65,6 @@ function Library:CreateWindow(hubName)
     title.Font = Enum.Font.GothamBold
     title.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Nút tam giác thu gọn kích thước khung
     local ToggleBtn = Instance.new("TextButton", TopBar)
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -76,7 +75,7 @@ function Library:CreateWindow(hubName)
     ToggleBtn.TextSize = 20
     ToggleBtn.Font = Enum.Font.SourceSansBold
 
-    -- 3. Khung bên trái và Khung bên phải
+    -- 3. Khung chứa Folder danh mục
     local leftContainer = Instance.new("Frame", MainFrame)
     leftContainer.Name = "LeftContainer"
     leftContainer.Size = UDim2.new(0, 150, 1, -65)
@@ -101,7 +100,6 @@ function Library:CreateWindow(hubName)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     rightLayout.Padding = UDim.new(0, 8)
 
-    -- LOGIC CLICK NÚT TAM GIÁC THU GỌN KHUNG
     local IsCollapsed = false
     local OriginalSize = UDim2.new(0, 550, 0, 380)
     local CollapsedSize = UDim2.new(0, 550, 0, 50) 
@@ -126,20 +124,13 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- ========================================================
-    -- 📱 HỆ THỐNG KÉO THẢ MAIN FRAME
-    -- ========================================================
+    -- Kéo thả MainFrame
     local dragging = false
     local dragInput, dragStart, startPos
 
     local function updateDrag(input)
         local delta = input.Position - dragStart
-        MainFrame.Position = UDim2.new(
-            startPos.X.Scale, 
-            startPos.X.Offset + delta.X, 
-            startPos.Y.Scale, 
-            startPos.Y.Offset + delta.Y
-        )
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
     end
 
     TopBar.InputBegan:Connect(function(input)
@@ -147,7 +138,6 @@ function Library:CreateWindow(hubName)
             dragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
-
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then dragging = false end
             end)
@@ -155,9 +145,7 @@ function Library:CreateWindow(hubName)
     end)
 
     TopBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
     end)
 
     UserInputService.InputChanged:Connect(function(input)
@@ -165,19 +153,22 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (VIỀN CẦU VỒNG + GÓC PHẢI)
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (FIX GÓC PHẢI TUYỆT ĐỐI + RGB)
     -- ========================================================
     local isOpened = true
 
     local MiniLogo = Instance.new("ImageButton")
-    MiniLogo.Name = "BacBeo_MiniLogo"
+    MiniLogo.Name = "BacBeo_MiniLogo_RGB"
     MiniLogo.Parent = ScreenGui
-    MiniLogo.Size = UDim2.new(0, 50, 0, 50)
-    -- 📍 Đổi vị trí xuất hiện đầu tiên sang góc RÌA BÊN PHẢI màn hình (Scale X = 0.95 để lùi vào một chút không bị tràn)
-    MiniLogo.Position = UDim2.new(0.95, -25, 0.5, -25) 
+    MiniLogo.Size = UDim2.new(0, 52, 0, 52)
+    
+    -- 🎯 FIX VỊ TRÍ GÓC PHẢI CHUẨN XÁC BẰNG ANCHOR POINT
+    MiniLogo.AnchorPoint = Vector2.new(1, 0.5) -- Đặt tâm bên phải để dính chặt lề phải
+    MiniLogo.Position = UDim2.new(0.985, 0, 0.5, 0) -- Nằm sát lề phải màn hình 
+    
     MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     MiniLogo.Image = "rbxassetid://100698867542221"
-    MiniLogo.Visible = false -- Ban đầu ẩn đi vì HUB đang hiện
+    MiniLogo.Visible = false 
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
 
@@ -186,7 +177,7 @@ function Library:CreateWindow(hubName)
     LogoText.Size = UDim2.new(1, 0, 1, 0)
     LogoText.BackgroundTransparency = 1
     LogoText.Text = "BB"
-    LogoText.TextColor3 = Color3.fromRGB(0, 255, 100)
+    LogoText.TextColor3 = Color3.fromRGB(255, 255, 255)
     LogoText.TextSize = 18
     LogoText.Font = Enum.Font.GothamBold
     LogoText.ZIndex = 100001
@@ -197,24 +188,26 @@ function Library:CreateWindow(hubName)
     if MiniLogo.Image ~= "" then LogoText.Visible = false end
 
     Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
+    
     local stroke = Instance.new("UIStroke", MiniLogo)
-    stroke.Thickness = 2
+    stroke.Thickness = 2.5 -- Cho viền dày lên một chút nhìn hiệu ứng cầu vồng rõ hơn
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- 🌈 HIỆU ỨNG VIỀN CẦU VỒNG (RAINBOW RGB)
-    RunService.RenderStepped:Connect(function()
-        local hue = (tick() % 3) / 3 -- Thay đổi số 3 thành số lớn hơn nếu muốn màu đổi chậm lại
+    -- 🌈 VÒNG LẶP LIÊN TỤC ĐỔI MÀU CẦU VỒNG (RGB) CỦA VIỀN
+    local tickCounter = 0
+    RunService.RenderStepped:Connect(function(deltaTime)
+        tickCounter = tickCounter + deltaTime
+        local hue = (tickCounter * 0.4) % 1 -- Thay đổi 0.4 để màu chạy nhanh hay chậm
         stroke.Color = Color3.fromHSV(hue, 1, 1)
     end)
 
-    -- Hàm xử lý trạng thái Đóng/Mở đồng bộ
     local function ToggleMainUI(state)
         isOpened = state
         MainFrame.Visible = isOpened
         MiniLogo.Visible = not isOpened
     end
 
-    -- HỆ THỐNG KÉO THẢ NÚT TRÒN KHÔNG BỊ TRÙNG CLICK MỞ HUB
+    -- Hệ thống kéo thả chống lỗi click nhầm
     local logoDragging = false
     local logoDragStart, logoStartPos
     local mouseStartPos = Vector3.new(0, 0, 0)
@@ -227,9 +220,7 @@ function Library:CreateWindow(hubName)
             mouseStartPos = input.Position
 
             input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then 
-                    logoDragging = false 
-                end
+                if input.UserInputState == Enum.UserInputState.End then logoDragging = false end
             end)
         end
     end)
@@ -237,6 +228,8 @@ function Library:CreateWindow(hubName)
     UserInputService.InputChanged:Connect(function(input)
         if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - logoDragStart
+            -- Khi kéo thả, hủy AnchorPoint tạm thời để tính toán tọa độ Offset tự do mượt mà
+            MiniLogo.AnchorPoint = Vector2.new(0, 0)
             MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
         end
     end)
@@ -245,8 +238,6 @@ function Library:CreateWindow(hubName)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             logoDragging = false
             local mouseDelta = (input.Position - mouseStartPos).Magnitude
-            
-            -- Nếu thả chuột lệch không quá 5 pixel -> Click tại chỗ -> Mở HUB lớn
             if mouseDelta <= 5 then
                 ToggleMainUI(true)
             end
@@ -262,24 +253,20 @@ function Library:CreateWindow(hubName)
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end 
-        
-        -- 🔒 KHÓA PHÍM: Nếu HUB lớn đang đóng (isOpened == false), chặn đứng hoàn toàn không cho dùng H-U-B
         if not isOpened then return end
 
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = input.KeyCode.Name
             local currentTime = tick()
             
-            if currentTime - lastKeyTime > 1.0 then
-                keySequence = {}
-            end
+            if currentTime - lastKeyTime > 1.0 then keySequence = {} end
             lastKeyTime = currentTime
             
             table.insert(keySequence, keyName)
             if #keySequence > 3 then table.remove(keySequence, 1) end
             
             if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
-                ToggleMainUI(false) -- Bấm H-U-B -> Ẩn HUB đi, hiện nút tròn viền cầu vồng
+                ToggleMainUI(false)
                 keySequence = {}
             end
         end
