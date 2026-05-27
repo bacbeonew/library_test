@@ -1,5 +1,12 @@
 local Library = {}
 
+-- ========================================================
+-- ⚙️ KHU VỰC CẤU HÌNH VỊ TRÍ ĐẦU TIÊN CỦA NÚT TRÒN TRÊN MÀN HÌNH
+-- ========================================================
+local VITRI_BANDAU = UDim2.new(0.02, 0, 0.5, 0) -- Nằm ở lề TRÁI màn hình để tránh bị che khuất
+
+-- ========================================================
+
 function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
     local UserInputService = game:GetService("UserInputService")
@@ -9,23 +16,24 @@ function Library:CreateWindow(hubName)
     local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
     
     -- ========================================================
-    -- 🚨 ANTI-DUPLICATE ĐÃ ĐƯỢC NÂNG CẤP: XÓA SẠCH BẢN CŨ VÀ ĐỔI TÊN GUI
+    -- 🚨 FORCE CLEAN: QUÉT SẠCH KHÔNG CHO CÁC BẢN LỖI CHẠY NGẦM
     -- ========================================================
-    local function CleanOldGUIs(parent)
-        if parent then
-            for _, child in pairs(parent:GetChildren()) do
-                if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
-                    child:Destroy()
+    local function ForceClean()
+        local targets = {CoreGui, PlayerGui}
+        for _, parent in pairs(targets) do
+            if parent then
+                for _, child in pairs(parent:GetChildren()) do
+                    if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
+                        child:Destroy()
+                    end
                 end
             end
         end
     end
-    
-    CleanOldGUIs(CoreGui)
-    CleanOldGUIs(PlayerGui)
+    ForceClean()
 
-    -- Đổi tên định danh mới hoàn toàn để không dính cache màu cũ
-    local GuiName = "BacBeoHub_VipRGB_NewEdition"
+    -- Tạo tên Gui ngẫu nhiên để ép Roblox cập nhật giao diện mới lập tức
+    local GuiName = "BacBeoHub_RGB_Fix_" .. tostring(math.random(100, 999))
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
@@ -39,7 +47,7 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = true 
+    MainFrame.Visible = true -- Đảm bảo luôn hiện khi CreateWindow được gọi
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -153,24 +161,25 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (FIX GÓC PHẢI TUYỆT ĐỐI + RGB)
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN
     -- ========================================================
     local isOpened = true
 
     local MiniLogo = Instance.new("ImageButton")
     MiniLogo.Name = "BacBeo_MiniLogo_RGB"
     MiniLogo.Parent = ScreenGui
-    MiniLogo.Size = UDim2.new(0, 52, 0, 52)
+    MiniLogo.Size = UDim2.new(0, 55, 0, 55)
     
-    -- 🎯 FIX VỊ TRÍ GÓC PHẢI CHUẨN XÁC BẰNG ANCHOR POINT
-    MiniLogo.AnchorPoint = Vector2.new(1, 0.5) -- Đặt tâm bên phải để dính chặt lề phải
-    MiniLogo.Position = UDim2.new(0.985, 0, 0.5, 0) -- Nằm sát lề phải màn hình 
-    
-    MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    MiniLogo.AnchorPoint = Vector2.new(0, 0.5) 
+    MiniLogo.Position = VITRI_BANDAU
+    MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MiniLogo.Image = "rbxassetid://100698867542221"
-    MiniLogo.Visible = false 
+    MiniLogo.Visible = false -- Ban đầu ẩn vì HUB chính đang mở công khai
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
+
+    local logoCorner = Instance.new("UICorner", MiniLogo)
+    logoCorner.CornerRadius = UDim.new(1, 0)
 
     local LogoText = Instance.new("TextLabel", MiniLogo)
     LogoText.Name = "LogoText"
@@ -178,29 +187,31 @@ function Library:CreateWindow(hubName)
     LogoText.BackgroundTransparency = 1
     LogoText.Text = "BB"
     LogoText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    LogoText.TextSize = 18
+    LogoText.TextSize = 20
     LogoText.Font = Enum.Font.GothamBold
     LogoText.ZIndex = 100001
+    LogoText.Visible = true
 
-    MiniLogo:GetPropertyChangedSignal("Image"):Connect(function()
-        if MiniLogo.Image ~= "" then LogoText.Visible = false else LogoText.Visible = true end
-    end)
-    if MiniLogo.Image ~= "" then LogoText.Visible = false end
-
-    Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
-    
     local stroke = Instance.new("UIStroke", MiniLogo)
-    stroke.Thickness = 2.5 -- Cho viền dày lên một chút nhìn hiệu ứng cầu vồng rõ hơn
+    stroke.Thickness = 2.5
     stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- 🌈 VÒNG LẶP LIÊN TỤC ĐỔI MÀU CẦU VỒNG (RGB) CỦA VIỀN
+    -- 🌈 VÒNG LẶP ĐỔI MÀU CẦU VỒNG (RGB)
     local tickCounter = 0
     RunService.RenderStepped:Connect(function(deltaTime)
         tickCounter = tickCounter + deltaTime
-        local hue = (tickCounter * 0.4) % 1 -- Thay đổi 0.4 để màu chạy nhanh hay chậm
+        local hue = (tickCounter * 0.4) % 1
         stroke.Color = Color3.fromHSV(hue, 1, 1)
     end)
 
+    MiniLogo.MouseEnter:Connect(function()
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
+    end)
+    MiniLogo.MouseLeave:Connect(function()
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+    end)
+
+    -- HÀM ĐỒNG BỘ ẨN HIỆN AN TOÀN
     local function ToggleMainUI(state)
         isOpened = state
         MainFrame.Visible = isOpened
@@ -228,8 +239,7 @@ function Library:CreateWindow(hubName)
     UserInputService.InputChanged:Connect(function(input)
         if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - logoDragStart
-            -- Khi kéo thả, hủy AnchorPoint tạm thời để tính toán tọa độ Offset tự do mượt mà
-            MiniLogo.AnchorPoint = Vector2.new(0, 0)
+            MiniLogo.AnchorPoint = Vector2.new(0, 0) 
             MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
         end
     end)
@@ -239,13 +249,13 @@ function Library:CreateWindow(hubName)
             logoDragging = false
             local mouseDelta = (input.Position - mouseStartPos).Magnitude
             if mouseDelta <= 5 then
-                ToggleMainUI(true)
+                ToggleMainUI(true) 
             end
         end
     end)
 
     -- ========================================================
-    -- ⌨️ TỔ HỢP PHÍM BÍ MẬT "H-U-B" (CÓ KHÓA KHI ĐANG ẨN)
+    -- ⌨️ TỔ HỢP PHÍM BÍ MẬT "H-U-B" (ĐÃ SỬA CHỐNG KẸT LOGIC)
     -- ========================================================
     local keySequence = {}
     local targetSequence = {"H", "U", "B"}
@@ -253,7 +263,6 @@ function Library:CreateWindow(hubName)
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end 
-        if not isOpened then return end
 
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = input.KeyCode.Name
@@ -266,7 +275,7 @@ function Library:CreateWindow(hubName)
             if #keySequence > 3 then table.remove(keySequence, 1) end
             
             if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
-                ToggleMainUI(false)
+                ToggleMainUI(not isOpened) -- Luôn cho phép đảo trạng thái ẩn/hiện mọi lúc mọi nơi
                 keySequence = {}
             end
         end
