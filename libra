@@ -63,7 +63,7 @@ function Library:CreateWindow(hubName)
     title.Font = Enum.Font.GothamBold
     title.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Nút tam giác thu gọn kích thước khung (Quay lại tính năng gốc)
+    -- Nút tam giác thu gọn kích thước khung (Gốc)
     local ToggleBtn = Instance.new("TextButton", TopBar)
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -99,7 +99,7 @@ function Library:CreateWindow(hubName)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     rightLayout.Padding = UDim.new(0, 8)
 
-    -- LOGIC CLICK NÚT TAM GIÁC (Thu gọn chiều cao khung Main)
+    -- LOGIC CLICK NÚT TAM GIÁC
     local IsCollapsed = false
     local OriginalSize = UDim2.new(0, 550, 0, 380)
     local CollapsedSize = UDim2.new(0, 550, 0, 50) 
@@ -163,7 +163,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 KHO KHỞI TẠO NÚT MINI LOGO TRÒN
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (ĐÃ KHẮC PHỤC LỖI KÉO THẢ)
     -- ========================================================
     local isOpened = true
 
@@ -198,47 +198,64 @@ function Library:CreateWindow(hubName)
     stroke.Color = Color3.fromRGB(0, 255, 100)
     stroke.Thickness = 2
 
-    -- Hàm Công tắc hoán đổi HUB <-> LOGO
     local function ToggleMainUI(state)
         isOpened = state
         MainFrame.Visible = isOpened
         MiniLogo.Visible = not isOpened
     end
-    
-    -- Click chuột trái/chạm tay trực tiếp vào Mini Logo vẫn mở lại HUB lớn bình thường
-    MiniLogo.MouseButton1Click:Connect(function()
-        ToggleMainUI(true)
-    end)
 
-    -- Kéo thả Mini Logo
+    -- 🔧 SỬA LỖI TẠI ĐÂY: Thêm biến check xem người dùng có thực sự di chuyển nút hay không
     local logoDragging = false
     local logoDragStart, logoStartPos
+    local hasMoved = false -- Biến đánh dấu nếu chuột bị di chuyển xa vị trí ban đầu
+
     MiniLogo.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             logoDragging = true
+            hasMoved = false -- Reset lại khi bắt đầu nhấn xuống
             logoDragStart = input.Position
             logoStartPos = MiniLogo.Position
+            
             input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then logoDragging = false end
+                if input.UserInputState == Enum.UserInputState.End then 
+                    logoDragging = false 
+                end
             end)
         end
     end)
+
     UserInputService.InputChanged:Connect(function(input)
         if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - logoDragStart
+            
+            -- Nếu khoảng cách di chuyển chuột lớn hơn 5 pixel thì tính là đang KÉO THẢ, không phải click
+            if delta.Magnitude > 5 then
+                hasMoved = true
+            end
+            
             MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
         end
     end)
 
+    -- Thay vì dùng MouseButton1Click bừa bãi, ta check điều kiện nhả chuột ra
+    MiniLogo.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            -- Chỉ mở lại HUB khi nút KHÔNG bị kéo đi chỗ khác (hasMoved == false)
+            if not hasMoved then
+                ToggleMainUI(true)
+            end
+        end
+    end)
+
     -- ========================================================
-    -- ⌨️ CHÍNH NÓ: GÕ "HUB" ĐỂ BẬT CÔNG TẮC HOÁN ĐỔI (MAIN <-> LOGO)
+    -- ⌨️ TỔ HỢP PHÍM BÍ MẬT "H-U-B" ĐỂ BẬT CÔNG TẮC
     -- ========================================================
     local keySequence = {}
     local targetSequence = {"H", "U", "B"}
     local lastKeyTime = 0
 
     UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end -- Đang gõ khung chat thì bỏ qua
+        if gpe then return end 
         
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = input.KeyCode.Name
@@ -252,10 +269,9 @@ function Library:CreateWindow(hubName)
             table.insert(keySequence, keyName)
             if #keySequence > 3 then table.remove(keySequence, 1) end
             
-            -- Nếu gõ chuẩn chữ "HUB"
             if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
-                ToggleMainUI(not isOpened) -- Đổi trạng thái: Nếu đang hiện HUB thì chuyển thành hiện Logo, và ngược lại!
-                keySequence = {} -- Reset chuỗi
+                ToggleMainUI(not isOpened)
+                keySequence = {}
             end
         end
     end)
