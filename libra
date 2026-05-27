@@ -3,7 +3,7 @@ local Library = {}
 -- ========================================================
 -- ⚙️ KHU VỰC CẤU HÌNH VỊ TRÍ ĐẦU TIÊN CỦA NÚT TRÒN TRÊN MÀN HÌNH
 -- ========================================================
-local VITRI_BANDAU = UDim2.new(0, 0, 0, 0) 
+
 
 -- ========================================================
 
@@ -194,7 +194,7 @@ function Library:CreateWindow(hubName)
     MiniLogo.Name = "BacBeo_MiniLogo_RGB"
     MiniLogo.Size = UDim2.new(0, 55, 0, 55)
     MiniLogo.AnchorPoint = Vector2.new(0, 0.5) 
-    MiniLogo.Position = VITRI_BANDAU
+    MiniLogo.Position = UDim2.new(0, 0, 0, 0) 
     MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MiniLogo.Image = "rbxassetid://100698867542221"
     MiniLogo.Visible = false -- Ban đầu ẩn vì MainFrame mở sẵn
