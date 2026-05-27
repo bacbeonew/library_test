@@ -4,6 +4,7 @@ function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
     local Players = game:GetService("Players")
     local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
     
@@ -164,7 +165,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (KÉO THẢ TỰ DO + CHỐNG LỖI)
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (VIỀN CẦU VỒNG + GÓC PHẢI)
     -- ========================================================
     local isOpened = true
 
@@ -172,8 +173,8 @@ function Library:CreateWindow(hubName)
     MiniLogo.Name = "BacBeo_MiniLogo"
     MiniLogo.Parent = ScreenGui
     MiniLogo.Size = UDim2.new(0, 50, 0, 50)
-    -- 📍 Khởi tạo mặc định xuất hiện ở rìa góc bên trái màn hình
-    MiniLogo.Position = UDim2.new(0.015, 0, 0.5, -25) 
+    -- 📍 Đổi vị trí xuất hiện đầu tiên sang góc RÌA BÊN PHẢI màn hình (Scale X = 0.95 để lùi vào một chút không bị tràn)
+    MiniLogo.Position = UDim2.new(0.95, -25, 0.5, -25) 
     MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     MiniLogo.Image = "rbxassetid://100698867542221"
     MiniLogo.Visible = false -- Ban đầu ẩn đi vì HUB đang hiện
@@ -197,8 +198,14 @@ function Library:CreateWindow(hubName)
 
     Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
     local stroke = Instance.new("UIStroke", MiniLogo)
-    stroke.Color = Color3.fromRGB(0, 255, 100)
     stroke.Thickness = 2
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+    -- 🌈 HIỆU ỨNG VIỀN CẦU VỒNG (RAINBOW RGB)
+    RunService.RenderStepped:Connect(function()
+        local hue = (tick() % 3) / 3 -- Thay đổi số 3 thành số lớn hơn nếu muốn màu đổi chậm lại
+        stroke.Color = Color3.fromHSV(hue, 1, 1)
+    end)
 
     -- Hàm xử lý trạng thái Đóng/Mở đồng bộ
     local function ToggleMainUI(state)
@@ -207,7 +214,7 @@ function Library:CreateWindow(hubName)
         MiniLogo.Visible = not isOpened
     end
 
-    -- 🌟 HỆ THỐNG KÉO THẢ NÚT TRÒN KHÔNG BỊ TRÙNG CLICK MỞ HUB
+    -- HỆ THỐNG KÉO THẢ NÚT TRÒN KHÔNG BỊ TRÙNG CLICK MỞ HUB
     local logoDragging = false
     local logoDragStart, logoStartPos
     local mouseStartPos = Vector3.new(0, 0, 0)
@@ -217,8 +224,6 @@ function Library:CreateWindow(hubName)
             logoDragging = true
             logoDragStart = input.Position
             logoStartPos = MiniLogo.Position
-            
-            -- Ghi lại vị trí con trỏ chuột ban đầu
             mouseStartPos = input.Position
 
             input.Changed:Connect(function()
@@ -239,12 +244,9 @@ function Library:CreateWindow(hubName)
     MiniLogo.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             logoDragging = false
-            
-            -- Tính khoảng cách di chuyển thực tế của chuột khi nhả ra
             local mouseDelta = (input.Position - mouseStartPos).Magnitude
             
-            -- 🎯 Nếu di chuyển chuột nhỏ hơn hoặc bằng 5 pixel -> Coi như là CLICK TẠI CHỖ -> Mở HUB
-            -- 🎯 Nếu lớn hơn 5 pixel -> Đang KÉO THẢ nút tròn di chuyển -> KHÔNG mở HUB lớn
+            -- Nếu thả chuột lệch không quá 5 pixel -> Click tại chỗ -> Mở HUB lớn
             if mouseDelta <= 5 then
                 ToggleMainUI(true)
             end
@@ -276,151 +278,4 @@ function Library:CreateWindow(hubName)
             table.insert(keySequence, keyName)
             if #keySequence > 3 then table.remove(keySequence, 1) end
             
-            if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
-                ToggleMainUI(false) -- Bấm H-U-B -> Ẩn HUB đi, hiện nút tròn (nằm ở vị trí cũ hoặc vị trí vừa kéo)
-                keySequence = {}
-            end
-        end
-    end)
-
-    local isFirstFolder = true
-
-    -- LOGIC TẠO DANH MỤC VÀ TÍNH NĂNG CON
-    local windowMethods = {}
-    function windowMethods:CreateFolder(folderName)
-        local folderBtn = Instance.new("TextButton", leftContainer)
-        folderBtn.Size = UDim2.new(1, 0, 0, 36)
-        folderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        folderBtn.Text = "  " .. folderName
-        folderBtn.TextColor3 = Color3.fromRGB(160, 160, 160)
-        folderBtn.TextSize = 14
-        folderBtn.Font = Enum.Font.SourceSansBold
-        folderBtn.TextXAlignment = Enum.TextXAlignment.Left
-
-        local btnCorner = Instance.new("UICorner", folderBtn)
-        btnCorner.CornerRadius = UDim.new(0, 6)
-
-        local featureFrame = Instance.new("Frame", rightContainer)
-        featureFrame.Size = UDim2.new(1, 0, 0, 0)
-        featureFrame.AutomaticSize = Enum.AutomaticSize.Y
-        featureFrame.BackgroundTransparency = 1
-        featureFrame.Visible = isFirstFolder
-
-        local featureLayout = Instance.new("UIListLayout", featureFrame)
-        featureLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        featureLayout.Padding = UDim.new(0, 6)
-
-        if isFirstFolder then
-            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
-            isFirstFolder = false
-        end
-
-        folderBtn.MouseButton1Click:Connect(function()
-            for _, f in pairs(rightContainer:GetChildren()) do
-                if f:IsA("Frame") then f.Visible = false end
-            end
-            for _, b in pairs(leftContainer:GetChildren()) do
-                if b:IsA("TextButton") then b.TextColor3 = Color3.fromRGB(160, 160, 160) end
-            end
-            featureFrame.Visible = true
-            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
-        end)
-
-        local itemMethods = {}
-
-        function itemMethods:Button(text, callback)
-            local btn = Instance.new("TextButton", featureFrame)
-            btn.Size = UDim2.new(1, -5, 0, 34)
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-            btn.Text = text
-            btn.TextColor3 = Color3.fromRGB(240, 240, 240)
-            btn.Font = Enum.Font.SourceSansSemibold
-            btn.TextSize = 15
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-
-            btn.MouseButton1Click:Connect(callback)
-            return btn
-        end
-
-        function itemMethods:Toggle(text, callback)
-            local state = false
-            local tFrame = Instance.new("Frame", featureFrame)
-            tFrame.Size = UDim2.new(1, -5, 0, 36)
-            tFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-            Instance.new("UICorner", tFrame).CornerRadius = UDim.new(0, 5)
-
-            local lbl = Instance.new("TextLabel", tFrame)
-            lbl.Size = UDim2.new(1, -60, 1, 0)
-            lbl.Position = UDim2.new(0, 10, 0, 0)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = text
-            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
-            lbl.Font = Enum.Font.SourceSans
-            lbl.TextSize = 15
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-            local btn = Instance.new("TextButton", tFrame)
-            btn.Size = UDim2.new(0, 40, 0, 22)
-            btn.Position = UDim2.new(1, -50, 0.5, -11)
-            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-            btn.Text = ""
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 11)
-
-            local circle = Instance.new("Frame", btn)
-            circle.Size = UDim2.new(0, 16, 0, 16)
-            circle.Position = UDim2.new(0, 3, 0.5, -8)
-            circle.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-            Instance.new("UICorner", circle).CornerRadius = UDim.new(0, 8)
-
-            btn.MouseButton1Click:Connect(function()
-                state = not state
-                if state then
-                    btn.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
-                    circle.Position = UDim2.new(1, -19, 0.5, -8)
-                else
-                    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-                    circle.Position = UDim2.new(0, 3, 0.5, -8)
-                end
-                callback(state)
-            end)
-        end
-
-        function itemMethods:Box(text, datatype, callback)
-            local bFrame = Instance.new("Frame", featureFrame)
-            bFrame.Size = UDim2.new(1, -5, 0, 36)
-            bFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-            Instance.new("UICorner", bFrame).CornerRadius = UDim.new(0, 5)
-
-            local lbl = Instance.new("TextLabel", bFrame)
-            lbl.Size = UDim2.new(1, -100, 1, 0)
-            lbl.Position = UDim2.new(0, 10, 0, 0)
-            lbl.BackgroundTransparency = 1
-            lbl.Text = text
-            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
-            lbl.Font = Enum.Font.SourceSans
-            lbl.TextSize = 15
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-            local box = Instance.new("TextBox", bFrame)
-            box.Size = UDim2.new(0, 80, 0, 24)
-            box.Position = UDim2.new(1, -90, 0.5, -12)
-            box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            box.Text = ""
-            box.TextColor3 = Color3.fromRGB(255, 255, 255)
-            box.Font = Enum.Font.SourceSans
-            box.TextSize = 14
-            Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
-
-            box.FocusLost:Connect(function()
-                local val = box.Text
-                if datatype == "number" then val = tonumber(val) or 0 end
-                callback(val)
-            end)
-        end
-
-        return itemMethods
-    end
-    return windowMethods
-end
-
-return Library
+            if keySequence[1] == targetSequence[1] and
