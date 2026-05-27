@@ -14,20 +14,23 @@ function Library:CreateWindow(hubName)
     local RunService = game:GetService("RunService")
     
     -- ========================================================
-    -- 🧹 ĐOẠN MÃ QUYẾT LIỆT: XÓA SẠCH BẤT CỨ UI CŨ NÀO ĐANG CHẠY NGẦM
+    -- 🧹 BƯỚC 1: DỌN SẠCH TẬN GỐC UI CŨ TRƯỚC KHI TẠO UI MỚI
     -- ========================================================
+    local GuiName = "BacBeoHub_Official_UI"
     for _, child in pairs(CoreGui:GetChildren()) do
-        if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeoHub") or child.Name == "BacBeoHub_Official_UI") then
+        if child:IsA("ScreenGui") and (child.Name == GuiName or string.find(child.Name, "BacBeoHub")) then
             child:Destroy()
         end
     end
 
-    local GuiName = "BacBeoHub_Official_UI"
+    -- Khởi tạo ScreenGui mới
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
 
-    -- 1. Khung Main chính gốc
+    -- ========================================================
+    -- 📦 BƯỚC 2: TẠO KHUNG MAIN CHÍNH (ÉP BUỘC HIỆN NGAY TỪ ĐẦU)
+    -- ========================================================
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
@@ -36,7 +39,7 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = true 
+    MainFrame.Visible = true -- Đảm bảo luôn hiện khi bật script
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -46,7 +49,7 @@ function Library:CreateWindow(hubName)
     UIStroke.Thickness = 1.5
     UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
-    -- 2. Thanh Tiêu đề (TopBar)
+    -- Thanh Tiêu đề (TopBar)
     local TopBar = Instance.new("Frame", MainFrame)
     TopBar.Name = "TopBar"
     TopBar.Size = UDim2.new(1, 0, 0, 50)
@@ -72,7 +75,7 @@ function Library:CreateWindow(hubName)
     ToggleBtn.TextSize = 20
     ToggleBtn.Font = Enum.Font.SourceSansBold
 
-    -- 3. Khung chứa Folder danh mục
+    -- Khung chứa Folder danh mục
     local leftContainer = Instance.new("Frame", MainFrame)
     leftContainer.Name = "LeftContainer"
     leftContainer.Size = UDim2.new(0, 150, 1, -65)
@@ -150,7 +153,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 NÚT MINI LOGO TRÒN (TUYỆT ĐỐI KHÔNG CHỮ BB)
+    -- 🔘 BƯỚC 3: NÚT MINI LOGO TRÒN (KHÔNG CHỮ BB)
     -- ========================================================
     local isOpened = true
 
@@ -162,7 +165,7 @@ function Library:CreateWindow(hubName)
     MiniLogo.Position = VITRI_BANDAU
     MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MiniLogo.Image = "rbxassetid://100698867542221"
-    MiniLogo.Visible = false -- Ban đầu ẩn vì Main đang mở công khai
+    MiniLogo.Visible = false -- Ban đầu ẩn đi vì MainFrame đang hiện công khai
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
 
@@ -225,13 +228,13 @@ function Library:CreateWindow(hubName)
             logoDragging = false
             local mouseDelta = (input.Position - mouseStartPos).Magnitude
             if mouseDelta <= 5 then
-                ToggleMainUI(true) -- Nhấp vào nút tròn để mở lại UI chính
+                ToggleMainUI(true) 
             end
         end
     end)
 
     -- ========================================================
-    -- ⌨️ TỔ HỢP PHÍM PHÍM TẮT "H-U-B" (ĐÃ THÊM KHÓA KHI LOGO HIỆN)
+    -- ⌨️ BƯỚC 4: KHÓA PHÍM TẮT "H-U-B" KHI LOGO TRÒN ĐANG HIỆN
     -- ========================================================
     local keySequence = {}
     local targetSequence = {"H", "U", "B"}
@@ -240,7 +243,7 @@ function Library:CreateWindow(hubName)
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end 
         
-        -- 🛑 KHÓA CHẾ ĐỘ PHÍM TẮT: Nếu nút tròn (MiniLogo) đang hiện, chặn hoàn toàn phím tắt
+        -- Nếu nút tròn đang mở -> khóa hoàn toàn tính năng tổ hợp phím tắt
         if MiniLogo.Visible == true then 
             return 
         end
