@@ -63,6 +63,7 @@ function Library:CreateWindow(hubName)
     title.Font = Enum.Font.GothamBold
     title.TextXAlignment = Enum.TextXAlignment.Left
 
+    -- Nút công tắc thu nhỏ (Đã chuyển thành tính năng chuyển sang Logo tròn)
     local ToggleBtn = Instance.new("TextButton", TopBar)
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
@@ -97,31 +98,6 @@ function Library:CreateWindow(hubName)
     local rightLayout = Instance.new("UIListLayout", rightContainer)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     rightLayout.Padding = UDim.new(0, 8)
-
-    -- LOGIC CLICK NÚT TAM GIÁC
-    local IsCollapsed = false
-    local OriginalSize = UDim2.new(0, 550, 0, 380)
-    local CollapsedSize = UDim2.new(0, 550, 0, 50) 
-
-    ToggleBtn.MouseButton1Click:Connect(function()
-        IsCollapsed = not IsCollapsed
-        if IsCollapsed then
-            ToggleBtn.Text = "▲"
-            leftContainer.Visible = false
-            rightContainer.Visible = false
-            TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
-        else
-            ToggleBtn.Text = "▼"
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
-            tween:Play()
-            tween.Completed:Connect(function()
-                if not IsCollapsed then
-                    leftContainer.Visible = true
-                    rightContainer.Visible = true
-                end
-            end)
-        end
-    end)
 
     -- ========================================================
     -- 📱 HỆ THỐNG KÉO THẢ ĐA NỀN TẢNG (HỖ TRỢ ĐIỆN THOẠI + PC)
@@ -166,7 +142,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 HỆ THỐNG NÚT MINI LOGO VÀ ĐỔI TRẠNG THÁI KHÔNG DÙNG PHÍM CỨNG
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO CÔNG TẮC 1 CHẠM (THAY THẾ CHỮ TRƯỚC)
     -- ========================================================
     local isOpened = true
 
@@ -177,12 +153,12 @@ function Library:CreateWindow(hubName)
     MiniLogo.Size = UDim2.new(0, 50, 0, 50)
     MiniLogo.Position = UDim2.new(0.02, 0, 0.4, 0)
     MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    MiniLogo.Image = "rbxassetid://100698867542221" -- ID ảnh thật nếu có
+    MiniLogo.Image = "rbxassetid://100698867542221" -- Ông thay ID ảnh thật vào đây nhé
     MiniLogo.Visible = false
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
 
-    -- Chữ dự phòng phòng khi ảnh không load được
+    -- Chữ dự phòng phòng khi ảnh không load được / bị lỗi kiểm duyệt
     local LogoText = Instance.new("TextLabel", MiniLogo)
     LogoText.Name = "LogoText"
     LogoText.Size = UDim2.new(1, 0, 1, 0)
@@ -203,25 +179,24 @@ function Library:CreateWindow(hubName)
     stroke.Color = Color3.fromRGB(0, 255, 100)
     stroke.Thickness = 2
 
-    -- Hàm chuyển đổi qua lại giữa HUB và Mini Logo
+    -- Hàm chuyển đổi trạng thái Công tắc qua lại giữa HUB và Logo
     local function ToggleMainUI(state)
         isOpened = state
         MainFrame.Visible = isOpened
         MiniLogo.Visible = not isOpened
     end
 
-    -- Bấm vào thanh TopBar (hoặc nút thu nhỏ bất kỳ theo ý ông) để ẩn HUB bật Logo lên
-    -- Ở đây tôi thêm một cơ chế: Nhấp đúp vào TopBar hoặc click thu nhỏ để chuyển đổi
-    ToggleBtn.MouseButton2Click:Connect(function()
-        ToggleMainUI(false) -- Chuột phải vào nút tam giác để chuyển thành Logo tròn
+    -- CHÍNH NÓ: Ấn nút tam giác "▼" một cái là HUB ẩn đi và hiện nút Logo Tròn luôn!
+    ToggleBtn.MouseButton1Click:Connect(function()
+        ToggleMainUI(false)
     end)
     
-    -- Khi click vào Mini Logo thì quay lại HUB
+    -- Khi click vào Mini Logo tròn thì mở ngược lại bảng HUB lớn
     MiniLogo.MouseButton1Click:Connect(function()
         ToggleMainUI(true)
     end)
 
-    -- Kéo thả cho Mini Logo
+    -- Hệ thống kéo thả mượt mà cho nút tròn Mini Logo
     local logoDragging = false
     local logoDragStart, logoStartPos
     MiniLogo.InputBegan:Connect(function(input)
@@ -242,7 +217,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- ⌨️ HỆ THỐNG PHÁT HIỆN TỔ HỢP CHỮ "H-U-B" ĐỂ ẨN/HIỆN TOÀN DIỆN
+    -- ⌨️ TỔ HỢP PHÍM BÍ MẬT "H-U-B" ĐỂ ẨN SẠCH (ANTI-SPY/KHÔNG VƯỚNG MÀN HÌNH)
     -- ========================================================
     local keySequence = {}
     local targetSequence = {"H", "U", "B"}
@@ -250,31 +225,24 @@ function Library:CreateWindow(hubName)
     local screenGuiEnabled = true
 
     UserInputService.InputBegan:Connect(function(input, gpe)
-        if gpe then return end -- Không tính nếu đang gõ ô chat
+        if gpe then return end -- Đang gõ chat hoặc nhập TextBox thì bỏ qua không tính
         
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = input.KeyCode.Name
             local currentTime = tick()
             
-            -- Nếu thời gian giữa 2 phím quá 1 giây, reset chuỗi đã gõ
             if currentTime - lastKeyTime > 1.0 then
                 keySequence = {}
             end
             lastKeyTime = currentTime
             
-            -- Thêm phím vừa gõ vào hàng đợi
             table.insert(keySequence, keyName)
+            if #keySequence > 3 then table.remove(keySequence, 1) end
             
-            -- Giữ độ dài hàng đợi tối đa là 3 kí tự
-            if #keySequence > 3 then
-                table.remove(keySequence, 1)
-            end
-            
-            -- Kiểm tra xem có khớp từ "HUB" không
             if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
                 screenGuiEnabled = not screenGuiEnabled
-                ScreenGui.Enabled = screenGuiEnabled -- Ẩn/Hiện toàn bộ tận gốc bao gồm cả Logo lẫn HUB!
-                keySequence = {} -- Reset chuỗi sau khi kích hoạt thành công
+                ScreenGui.Enabled = screenGuiEnabled -- Ẩn hoàn toàn (Logo và HUB biến mất sạch)
+                keySequence = {}
             end
         end
     end)
@@ -413,23 +381,6 @@ function Library:CreateWindow(hubName)
                 if datatype == "number" then val = tonumber(val) or 0 end
                 callback(val)
             end)
-        end
-
-        -- Tích hợp thêm hàm này để ông có thể chủ động gọi ẩn HUB sang Logo bằng nút bấm trong menu nếu muốn
-        function itemMethods:HideToLogoButton(text)
-            local btn = Instance.new("TextButton", featureFrame)
-            btn.Size = UDim2.new(1, -5, 0, 34)
-            btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-            btn.Text = text or "Thu gọn thành Logo tròn"
-            btn.TextColor3 = Color3.fromRGB(0, 255, 100)
-            btn.Font = Enum.Font.SourceSansBold
-            btn.TextSize = 14
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-
-            btn.MouseButton1Click:Connect(function()
-                ToggleMainUI(false)
-            end)
-            return btn
         end
 
         return itemMethods
