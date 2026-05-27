@@ -29,7 +29,7 @@ function Library:CreateWindow(hubName)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
 
-    -- 1. Khung Main chính gốc (Mặc định ẩn đi để chờ Intro xong)
+    -- 1. Khung Main chính gốc
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
@@ -38,7 +38,7 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = false -- Chờ gọi hàm mở sau Intro
+    MainFrame.Visible = true -- Ban đầu luôn hiện HUB chính
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -100,7 +100,76 @@ function Library:CreateWindow(hubName)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
     rightLayout.Padding = UDim.new(0, 8)
 
-    -- LOGIC CLICK NÚT TAM GIÁC
+    -- ========================================================
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (CỐ ĐỊNH GÓC TRÁI)
+    -- ========================================================
+    local isOpened = true
+
+    local MiniLogo = Instance.new("ImageButton")
+    MiniLogo.Name = "BacBeo_MiniLogo"
+    MiniLogo.Parent = ScreenGui
+    MiniLogo.Size = UDim2.new(0, 50, 0, 50)
+    -- Khởi tạo vị trí cố định ở rìa góc trái màn hình giống file image_f8ff06.png
+    MiniLogo.Position = UDim2.new(0.015, 0, 0.5, -25) 
+    MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    MiniLogo.Image = "rbxassetid://100698867542221"
+    MiniLogo.Visible = false -- Ban đầu ẩn đi vì HUB đang hiện
+    MiniLogo.ZIndex = 100000
+    MiniLogo.Active = true
+
+    local LogoText = Instance.new("TextLabel", MiniLogo)
+    LogoText.Name = "LogoText"
+    LogoText.Size = UDim2.new(1, 0, 1, 0)
+    LogoText.BackgroundTransparency = 1
+    LogoText.Text = "BB"
+    LogoText.TextColor3 = Color3.fromRGB(0, 255, 100)
+    LogoText.TextSize = 18
+    LogoText.Font = Enum.Font.GothamBold
+    LogoText.ZIndex = 100001
+
+    MiniLogo:GetPropertyChangedSignal("Image"):Connect(function()
+        if MiniLogo.Image ~= "" then LogoText.Visible = false else LogoText.Visible = true end
+    end)
+    if MiniLogo.Image ~= "" then LogoText.Visible = false end
+
+    Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
+    local stroke = Instance.new("UIStroke", MiniLogo)
+    stroke.Color = Color3.fromRGB(0, 255, 100)
+    stroke.Thickness = 2
+
+    -- Hàm xử lý Đóng/Mở HUB và Khóa/Mở Khóa phím tắt
+    local function ToggleMainUI(state)
+        isOpened = state
+        MainFrame.Visible = isOpened
+        
+        if not isOpened then
+            -- Khi ĐÓNG HUB: Đặt lại vị trí nút tròn luôn về góc trái màn hình, sau đó hiển thị nó lên
+            MiniLogo.Position = UDim2.new(0.015, 0, 0.5, -25)
+            MiniLogo.Visible = true
+        else
+            -- Khi MỞ HUB: Ẩn nút tròn đi
+            MiniLogo.Visible = false
+        end
+    end
+
+    -- Đóng mở bằng cách click vào nút tròn (Bao lệch chuột)
+    local mouseStartPos = Vector3.new(0, 0, 0)
+    MiniLogo.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            mouseStartPos = input.Position
+        end
+    end)
+
+    MiniLogo.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            local mouseDelta = (input.Position - mouseStartPos).Magnitude
+            if mouseDelta <= 5 then
+                ToggleMainUI(true) -- Click vào nút tròn thì mở lại HUB lớn
+            end
+        end
+    end)
+
+    -- LOGIC CLICK NÚT TAM GIÁC THU GỌN KHUNG
     local IsCollapsed = false
     local OriginalSize = UDim2.new(0, 550, 0, 380)
     local CollapsedSize = UDim2.new(0, 550, 0, 50) 
@@ -163,123 +232,42 @@ function Library:CreateWindow(hubName)
         if input == dragInput and dragging then updateDrag(input) end
     end)
 
-
     -- ========================================================
-    -- 🚀 HÀM KÍCH HOẠT HỆ THỐNG PHÍM TẮT VÀ NÚT TRÒN GÓC TRÁI (GỌI SAU INTRO)
+    -- ⌨️ TỔ HỢP PHÍM BÍ MẬT "H-U-B" (CÓ KHÓA KHI ĐANG ẨN)
     -- ========================================================
-    local isOpened = true
-    local windowMethods = {}
+    local keySequence = {}
+    local targetSequence = {"H", "U", "B"}
+    local lastKeyTime = 0
 
-    function windowMethods:InitToggleSystem()
-        -- 1. Tạo nút tròn khi hàm này được gọi
-        local MiniLogo = Instance.new("ImageButton")
-        MiniLogo.Name = "BacBeo_MiniLogo"
-        MiniLogo.Parent = ScreenGui
-        MiniLogo.Size = UDim2.new(0, 50, 0, 50)
-        MiniLogo.Position = UDim2.new(0.015, 0, 0.5, -25) -- Cố định ở góc rìa trái màn hình, căn giữa dọc
-        MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-        MiniLogo.Image = "rbxassetid://100698867542221"
-        MiniLogo.ZIndex = 100000
-        MiniLogo.Active = true
+    UserInputService.InputBegan:Connect(function(input, gpe)
+        if gpe then return end 
+        
+        -- 🔒 ĐIỀU KIỆN KHÓA: Nếu HUB đang đóng (isOpened == false), chặn đứng tổ hợp phím không cho chạy tiếp
+        if not isOpened then return end
 
-        local LogoText = Instance.new("TextLabel", MiniLogo)
-        LogoText.Name = "LogoText"
-        LogoText.Size = UDim2.new(1, 0, 1, 0)
-        LogoText.BackgroundTransparency = 1
-        LogoText.Text = "BB"
-        LogoText.TextColor3 = Color3.fromRGB(0, 255, 100)
-        LogoText.TextSize = 18
-        LogoText.Font = Enum.Font.GothamBold
-        LogoText.ZIndex = 100001
-
-        MiniLogo:GetPropertyChangedSignal("Image"):Connect(function()
-            if MiniLogo.Image ~= "" then LogoText.Visible = false else LogoText.Visible = true end
-        end)
-        if MiniLogo.Image ~= "" then LogoText.Visible = false end
-
-        Instance.new("UICorner", MiniLogo).CornerRadius = UDim.new(1, 0)
-        local stroke = Instance.new("UIStroke", MiniLogo)
-        stroke.Color = Color3.fromRGB(0, 255, 100)
-        stroke.Thickness = 2
-
-        -- Hàm toggle chính
-        local function ToggleMainUI(state)
-            isOpened = state
-            MainFrame.Visible = isOpened
-            MiniLogo.Visible = not isOpened
+        if input.UserInputType == Enum.UserInputType.Keyboard then
+            local keyName = input.KeyCode.Name
+            local currentTime = tick()
+            
+            if currentTime - lastKeyTime > 1.0 then
+                keySequence = {}
+            end
+            lastKeyTime = currentTime
+            
+            table.insert(keySequence, keyName)
+            if #keySequence > 3 then table.remove(keySequence, 1) end
+            
+            if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
+                ToggleMainUI(false) -- Bấm H-U-B khi HUB đang hiện -> Ẩn HUB đi, hiện nút tròn góc trái
+                keySequence = {}
+            end
         end
-
-        -- Khi vừa hết Intro gọi hàm này, ta cho hiển thị thẳng HUB lớn lên
-        ToggleMainUI(true)
-
-        -- Logic kéo thả nút tròn bằng chuột hệ thống
-        local logoDragging = false
-        local logoDragStart, logoStartPos
-        local mouseStartPos = Vector3.new(0, 0, 0)
-
-        MiniLogo.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                logoDragging = true
-                logoDragStart = input.Position
-                logoStartPos = MiniLogo.Position
-                mouseStartPos = input.Position
-
-                input.Changed:Connect(function()
-                    if input.UserInputState == Enum.UserInputState.End then 
-                        logoDragging = false 
-                    end
-                end)
-            end
-        end)
-
-        UserInputService.InputChanged:Connect(function(input)
-            if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                local delta = input.Position - logoDragStart
-                MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
-            end
-        end)
-
-        MiniLogo.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                logoDragging = false
-                local mouseEndPos = input.Position
-                local mouseDelta = (mouseEndPos - mouseStartPos).Magnitude
-                
-                if mouseDelta <= 5 then
-                    ToggleMainUI(true)
-                end
-            end
-        end)
-
-        -- 2. Kích hoạt tổ hợp phím bí mật "H-U-B"
-        local keySequence = {}
-        local targetSequence = {"H", "U", "B"}
-        local lastKeyTime = 0
-
-        UserInputService.InputBegan:Connect(function(input, gpe)
-            if gpe then return end 
-            if input.UserInputType == Enum.UserInputType.Keyboard then
-                local keyName = input.KeyCode.Name
-                local currentTime = tick()
-                
-                if currentTime - lastKeyTime > 1.0 then keySequence = {} end
-                lastKeyTime = currentTime
-                
-                table.insert(keySequence, keyName)
-                if #keySequence > 3 then table.remove(keySequence, 1) end
-                
-                if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
-                    ToggleMainUI(not isOpened)
-                    keySequence = {}
-                end
-            end
-        end)
-    end
-    -- ========================================================
+    end)
 
     local isFirstFolder = true
 
     -- LOGIC TẠO DANH MỤC VÀ TÍNH NĂNG CON
+    local windowMethods = {}
     function windowMethods:CreateFolder(folderName)
         local folderBtn = Instance.new("TextButton", leftContainer)
         folderBtn.Size = UDim2.new(1, 0, 0, 36)
