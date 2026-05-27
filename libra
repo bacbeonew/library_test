@@ -38,7 +38,6 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = true
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -164,7 +163,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (FIX TUYỆT ĐỐI BẰNG MOUSE POSITION)
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN
     -- ========================================================
     local isOpened = true
 
@@ -175,7 +174,6 @@ function Library:CreateWindow(hubName)
     MiniLogo.Position = UDim2.new(0.02, 0, 0.4, 0)
     MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     MiniLogo.Image = "rbxassetid://100698867542221"
-    MiniLogo.Visible = false
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
 
@@ -199,24 +197,26 @@ function Library:CreateWindow(hubName)
     stroke.Color = Color3.fromRGB(0, 255, 100)
     stroke.Thickness = 2
 
+    -- Hàm đồng bộ trạng thái hiển thị chuẩn mực
     local function ToggleMainUI(state)
         isOpened = state
         MainFrame.Visible = isOpened
         MiniLogo.Visible = not isOpened
     end
+    
+    -- 🚀 ĐỒNG BỘ GỐC: Gọi hàm này để thiết lập ban đầu luôn hiện HUB lớn và ẩn nút tròn chuẩn chỉ
+    ToggleMainUI(true)
 
-    -- Biến quản lý logic kéo thả chuẩn theo hệ tọa độ chuột của hệ thống
+    -- Biến quản lý logic kéo thả vị trí chuột hệ thống
     local logoDragging = false
     local logoDragStart, logoStartPos
-    local mouseStartPos = Vector3.new(0, 0, 0) -- Lưu vị trí chuột lúc bấm xuống
+    local mouseStartPos = Vector3.new(0, 0, 0)
 
     MiniLogo.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             logoDragging = true
             logoDragStart = input.Position
             logoStartPos = MiniLogo.Position
-            
-            -- 🔥 LẤY TỌA ĐỘ CHUỘT THỰC TẾ NGAY LÚC CLICK XUỐNG
             mouseStartPos = input.Position
 
             input.Changed:Connect(function()
@@ -234,19 +234,13 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- 🔥 THUẬT TOÁN MỚI: Check khoảng cách di chuyển thực tế của chuột/ngón tay
     MiniLogo.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             logoDragging = false
-            
-            -- Lấy vị trí con chuột lúc vừa buông tay ra
             local mouseEndPos = input.Position
-            
-            -- Tính xem từ lúc bấm xuống đến lúc thả ra con chuột lệch bao nhiêu pixel
             local mouseDelta = (mouseEndPos - mouseStartPos).Magnitude
             
-            -- Nếu chuột lệch ít hơn hoặc bằng 5 pixel -> Nghĩa là click tại chỗ -> Mở HUB
-            -- Nếu chuột lệch nhiều hơn 5 pixel -> Đang kéo thả -> KHÔNG mở HUB
+            -- Nếu chuột di chuyển lệch không quá 5 pixel -> Click tại chỗ -> Mở HUB
             if mouseDelta <= 5 then
                 ToggleMainUI(true)
             end
