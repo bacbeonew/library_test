@@ -4,6 +4,7 @@ function Library:CreateWindow(hubName)
     local CoreGui = game:GetService("CoreGui")
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
+    local RunService = game:GetService("RunService")
     local Players = game:GetService("Players")
     local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
     
@@ -140,13 +141,11 @@ function Library:CreateWindow(hubName)
     end
 
     TopBar.InputBegan:Connect(function(input)
-        -- Kiểm tra nếu người dùng Click chuột trái (PC) HOẶC chạm ngón tay vào màn hình (Mobile)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
 
-            -- Lắng nghe khi người dùng bỏ tay ra hoặc nhả chuột
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
@@ -156,7 +155,6 @@ function Library:CreateWindow(hubName)
     end)
 
     TopBar.InputChanged:Connect(function(input)
-        -- Kiểm tra trạng thái di chuyển của chuột hoặc ngón tay vuốt
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
@@ -167,16 +165,71 @@ function Library:CreateWindow(hubName)
             updateDrag(input)
         end
     end)
-    -- ========================================================
 
-    -- Phím tắt ẩn hoàn toàn GUI khỏi màn hình (RightControl)
+    -- ========================================================
+    -- 🛡️ KHỞI TẠO HỆ THỐNG LOGO THU GỌN VÀ BIẾN ĐÓNG/MỞ TOÀN CỤC
+    -- ========================================================
+    local mainToggleKey = Enum.KeyCode.RightControl -- Phím mặc định ban đầu
     local isOpened = true
-    UserInputService.InputBegan:Connect(function(input, gpe)
-        if not gpe and input.KeyCode == Enum.KeyCode.RightControl then
-            isOpened = not isOpened
-            ScreenGui.Enabled = isOpened
+    local isListeningForMainKey = false
+
+    -- Tạo nút Mini Logo khi ẩn HUB (Nằm cùng ScreenGui để dễ quản lý)
+    local MiniLogo = Instance.new("ImageButton", ScreenGui)
+    MiniLogo.Name = "MiniLogo"
+    MiniLogo.Size = UDim2.new(0, 48, 0, 48)
+    MiniLogo.Position = UDim2.new(0.01, 0, 0.4, 0) -- Nằm bên rìa trái màn hình
+    MiniLogo.BackgroundTransparency = 1
+    MiniLogo.Image = "rbxassetid://100698867542221" -- ID Logo BacBeo gốc của ông
+    MiniLogo.Visible = false
+    MiniLogo.ZIndex = 100000
+
+    local logoCorner = Instance.new("UICorner", MiniLogo)
+    logoCorner.CornerRadius = UDim.new(1, 0)
+
+    local logoStroke = Instance.new("UIStroke", MiniLogo)
+    logoStroke.Color = Color3.fromRGB(0, 255, 100)
+    logoStroke.Thickness = 2
+
+    -- Hàm xử lý logic ẩn/hiện đồng bộ giữa HUB và Logo
+    local function SetHubVisibility(state)
+        isOpened = state
+        MainFrame.Visible = isOpened
+        MiniLogo.Visible = not isOpened
+    end
+
+    -- Nhấp vào Mini Logo thì mở lại HUB
+    MiniLogo.MouseButton1Click:Connect(function()
+        SetHubVisibility(true)
+    end)
+
+    -- Hệ thống kéo thả dành riêng cho nút Mini Logo
+    local logoDragging = false
+    local logoDragStart, logoStartPos
+    MiniLogo.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            logoDragging = true
+            logoDragStart = input.Position
+            logoStartPos = MiniLogo.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then logoDragging = false end
+            end)
         end
     end)
+    UserInputService.InputChanged:Connect(function(input)
+        if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - logoDragStart
+            MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
+        end
+    end)
+
+    -- Lắng nghe phím bấm để đóng/mở HUB toàn cục
+    UserInputService.InputBegan:Connect(function(input, gpe)
+        if gpe or isListeningForMainKey then return end
+        if input.KeyCode == mainToggleKey then
+            SetHubVisibility(not isOpened)
+        end
+    end)
+    -- ========================================================
 
     local isFirstFolder = true
 
@@ -311,6 +364,77 @@ function Library:CreateWindow(hubName)
                 if datatype == "number" then val = tonumber(val) or 0 end
                 callback(val)
             end)
+        end
+
+        -- ========================================================
+        -- 🛠️ HÀM MỚI: TẠO Ô CHỌN PHÍM TẮT (KEYBIND) CHO THƯ VIỆN GỐC
+        -- ========================================================
+        function itemMethods:Keybind(text, isMainToggle, callback)
+            local kFrame = Instance.new("Frame", featureFrame)
+            kFrame.Size = UDim2.new(1, -5, 0, 36)
+            kFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+            Instance.new("UICorner", kFrame).CornerRadius = UDim.new(0, 5)
+
+            local lbl = Instance.new("TextLabel", kFrame)
+            lbl.Size = UDim2.new(1, -120, 1, 0)
+            lbl.Position = UDim2.new(0, 10, 0, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = text
+            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+            lbl.Font = Enum.Font.SourceSans
+            lbl.TextSize = 15
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+            local bindBtn = Instance.new("TextButton", kFrame)
+            bindBtn.Size = UDim2.new(0, 90, 0, 24)
+            bindBtn.Position = UDim2.new(1, -100, 0.5, -12)
+            bindBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            bindBtn.Text = isMainToggle and mainToggleKey.Name or "None"
+            bindBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+            bindBtn.Font = Enum.Font.SourceSansBold
+            bindBtn.TextSize = 13
+            Instance.new("UICorner", bindBtn).CornerRadius = UDim.new(0, 4)
+            
+            local localBindKey = isMainToggle and mainToggleKey or nil
+            local listening = false
+            local connection
+
+            bindBtn.MouseButton1Click:Connect(function()
+                if listening then return end
+                listening = true
+                if isMainToggle then isListeningForMainKey = true end
+                bindBtn.Text = "..."
+                bindBtn.TextColor3 = Color3.fromRGB(255, 255, 100)
+
+                connection = UserInputService.InputBegan:Connect(function(input)
+                    if input.UserInputType == Enum.UserInputType.Keyboard then
+                        local selectedKey = input.KeyCode
+                        listening = false
+                        
+                        if isMainToggle then
+                            mainToggleKey = selectedKey
+                            isListeningForMainKey = false
+                        else
+                            localBindKey = selectedKey
+                        end
+
+                        bindBtn.Text = selectedKey.Name
+                        bindBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+                        
+                        if callback then callback(selectedKey) end
+                        connection:Disconnect()
+                    end
+                end)
+            end)
+
+            -- Nếu không phải là nút gán cho việc Đóng/Mở HUB chính, nó có thể dùng để lắng nghe phím riêng cho các tính năng hack khác
+            if not isMainToggle then
+                UserInputService.InputBegan:Connect(function(input, gpe)
+                    if not gpe and localBindKey and input.KeyCode == localBindKey then
+                        if callback then callback(localBindKey) end
+                    end
+                end)
+            end
         end
 
         return itemMethods
