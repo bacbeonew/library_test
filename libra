@@ -29,7 +29,7 @@ function Library:CreateWindow(hubName)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
 
-    -- 1. Khung Main chính gốc (Đảm bảo luôn Visible = true khi chạy)
+    -- 1. Khung Main chính gốc
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Name = "Main"
     MainFrame.Size = UDim2.new(0, 550, 0, 380)
@@ -38,7 +38,7 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = true -- Ép buộc hiển thị lúc đầu
+    MainFrame.Visible = true
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -81,7 +81,6 @@ function Library:CreateWindow(hubName)
     leftContainer.Size = UDim2.new(0, 150, 1, -65)
     leftContainer.Position = UDim2.new(0, 10, 0, 55)
     leftContainer.BackgroundTransparency = 1
-    leftContainer.Visible = true -- Đảm bảo hiển thị
 
     local leftLayout = Instance.new("UIListLayout", leftContainer)
     leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -96,7 +95,6 @@ function Library:CreateWindow(hubName)
     rightContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
     rightContainer.ScrollBarThickness = 3
     rightContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
-    rightContainer.Visible = true -- Đảm bảo hiển thị
 
     local rightLayout = Instance.new("UIListLayout", rightContainer)
     rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -166,7 +164,7 @@ function Library:CreateWindow(hubName)
     end)
 
     -- ========================================================
-    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN
+    -- 🔘 HỆ THỐNG NÚT MINI LOGO TRÒN (FIX TUYỆT ĐỐI BẰNG MOUSE POSITION)
     -- ========================================================
     local isOpened = true
 
@@ -177,7 +175,7 @@ function Library:CreateWindow(hubName)
     MiniLogo.Position = UDim2.new(0.02, 0, 0.4, 0)
     MiniLogo.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     MiniLogo.Image = "rbxassetid://100698867542221"
-    MiniLogo.Visible = false -- Mặc định ẩn nút tròn lúc khởi động
+    MiniLogo.Visible = false
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
 
@@ -207,17 +205,19 @@ function Library:CreateWindow(hubName)
         MiniLogo.Visible = not isOpened
     end
 
-    -- Biến quản lý logic kéo thả vị trí tuyệt đối
+    -- Biến quản lý logic kéo thả chuẩn theo hệ tọa độ chuột của hệ thống
     local logoDragging = false
     local logoDragStart, logoStartPos
-    local positionAtStart = Vector2.new(0, 0)
+    local mouseStartPos = Vector3.new(0, 0, 0) -- Lưu vị trí chuột lúc bấm xuống
 
     MiniLogo.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             logoDragging = true
             logoDragStart = input.Position
             logoStartPos = MiniLogo.Position
-            positionAtStart = Vector2.new(MiniLogo.AbsolutePosition.X, MiniLogo.AbsolutePosition.Y)
+            
+            -- 🔥 LẤY TỌA ĐỘ CHUỘT THỰC TẾ NGAY LÚC CLICK XUỐNG
+            mouseStartPos = input.Position
 
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then 
@@ -234,13 +234,20 @@ function Library:CreateWindow(hubName)
         end
     end)
 
+    -- 🔥 THUẬT TOÁN MỚI: Check khoảng cách di chuyển thực tế của chuột/ngón tay
     MiniLogo.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             logoDragging = false
-            local positionAtEnd = Vector2.new(MiniLogo.AbsolutePosition.X, MiniLogo.AbsolutePosition.Y)
-            local distanceMoved = (positionAtEnd - positionAtStart).Magnitude
             
-            if distanceMoved <= 3 then
+            -- Lấy vị trí con chuột lúc vừa buông tay ra
+            local mouseEndPos = input.Position
+            
+            -- Tính xem từ lúc bấm xuống đến lúc thả ra con chuột lệch bao nhiêu pixel
+            local mouseDelta = (mouseEndPos - mouseStartPos).Magnitude
+            
+            -- Nếu chuột lệch ít hơn hoặc bằng 5 pixel -> Nghĩa là click tại chỗ -> Mở HUB
+            -- Nếu chuột lệch nhiều hơn 5 pixel -> Đang kéo thả -> KHÔNG mở HUB
+            if mouseDelta <= 5 then
                 ToggleMainUI(true)
             end
         end
