@@ -3,7 +3,7 @@ local Library = {}
 -- ========================================================
 -- ⚙️ KHU VỰC CẤU HÌNH VỊ TRÍ ĐẦU TIÊN CỦA NÚT TRÒN TRÊN MÀN HÌNH
 -- ========================================================
-local VITRI_BANDAU = UDim2.new(0.02, 0, 0.5, 0) -- Nằm ở lề TRÁI màn hình để tránh bị che khuất
+local VITRI_BANDAU = UDim2.new(0.02, 0, 0.5, 0) -- Nằm ở lề TRÁI màn hình
 
 -- ========================================================
 
@@ -12,28 +12,12 @@ function Library:CreateWindow(hubName)
     local UserInputService = game:GetService("UserInputService")
     local TweenService = game:GetService("TweenService")
     local RunService = game:GetService("RunService")
-    local Players = game:GetService("Players")
-    local PlayerGui = Players.LocalPlayer:FindFirstChildOfClass("PlayerGui")
     
-    -- ========================================================
-    -- 🚨 FORCE CLEAN: QUÉT SẠCH KHÔNG CHO CÁC BẢN LỖI CHẠY NGẦM
-    -- ========================================================
-    local function ForceClean()
-        local targets = {CoreGui, PlayerGui}
-        for _, parent in pairs(targets) do
-            if parent then
-                for _, child in pairs(parent:GetChildren()) do
-                    if child:IsA("ScreenGui") and (string.find(child.Name, "BacBeo") or string.find(child.Name, "Lybra") or string.find(child.Name, "Dashboard")) then
-                        child:Destroy()
-                    end
-                end
-            end
-        end
-    end
-    ForceClean()
+    -- Tạo tên Gui cố định nhưng sạch sẽ để tránh xung đột
+    local GuiName = "BacBeoHub_Official_UI"
+    local OldGui = CoreGui:FindFirstChild(GuiName)
+    if OldGui then OldGui:Destroy() end
 
-    -- Tạo tên Gui ngẫu nhiên để ép Roblox cập nhật giao diện mới lập tức
-    local GuiName = "BacBeoHub_RGB_Fix_" .. tostring(math.random(100, 999))
     local ScreenGui = Instance.new("ScreenGui", CoreGui)
     ScreenGui.Name = GuiName
     ScreenGui.ResetOnSpawn = false
@@ -47,7 +31,7 @@ function Library:CreateWindow(hubName)
     MainFrame.BorderSizePixel = 0
     MainFrame.ClipsDescendants = true 
     MainFrame.Active = true
-    MainFrame.Visible = true -- Đảm bảo luôn hiện khi CreateWindow được gọi
+    MainFrame.Visible = true 
 
     local corner = Instance.new("UICorner", MainFrame)
     corner.CornerRadius = UDim.new(0, 10)
@@ -174,7 +158,7 @@ function Library:CreateWindow(hubName)
     MiniLogo.Position = VITRI_BANDAU
     MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     MiniLogo.Image = "rbxassetid://100698867542221"
-    MiniLogo.Visible = false -- Ban đầu ẩn vì HUB chính đang mở công khai
+    MiniLogo.Visible = false 
     MiniLogo.ZIndex = 100000
     MiniLogo.Active = true
 
@@ -211,14 +195,13 @@ function Library:CreateWindow(hubName)
         TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
     end)
 
-    -- HÀM ĐỒNG BỘ ẨN HIỆN AN TOÀN
     local function ToggleMainUI(state)
         isOpened = state
         MainFrame.Visible = isOpened
         MiniLogo.Visible = not isOpened
     end
 
-    -- Hệ thống kéo thả chống lỗi click nhầm
+    -- Kéo thả nút tròn
     local logoDragging = false
     local logoDragStart, logoStartPos
     local mouseStartPos = Vector3.new(0, 0, 0)
@@ -254,16 +237,13 @@ function Library:CreateWindow(hubName)
         end
     end)
 
-    -- ========================================================
-    -- ⌨️ TỔ HỢP PHÍM BÍ MẬT "H-U-B" (ĐÃ SỬA CHỐNG KẸT LOGIC)
-    -- ========================================================
+    -- ⌨️ TỔ HỢP PHÍM "H-U-B"
     local keySequence = {}
     local targetSequence = {"H", "U", "B"}
     local lastKeyTime = 0
 
     UserInputService.InputBegan:Connect(function(input, gpe)
         if gpe then return end 
-
         if input.UserInputType == Enum.UserInputType.Keyboard then
             local keyName = input.KeyCode.Name
             local currentTime = tick()
@@ -275,7 +255,7 @@ function Library:CreateWindow(hubName)
             if #keySequence > 3 then table.remove(keySequence, 1) end
             
             if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
-                ToggleMainUI(not isOpened) -- Luôn cho phép đảo trạng thái ẩn/hiện mọi lúc mọi nơi
+                ToggleMainUI(not isOpened)
                 keySequence = {}
             end
         end
