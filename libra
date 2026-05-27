@@ -11,7 +11,7 @@ local Library = {}
 --   - Góc DƯỚI bên PHẢI:  UDim2.new(0.95, 0, 0.85, 0)
 --   - Góc GIỮA bên TRÁI:  UDim2.new(0.02, 0, 0.5, 0)
 
-local VITRI_BANDAU = UDim2.new(0.95, 0, 0.4, 0) -- 🌟 ÔNG THAY ĐỔI TỌA ĐỘ NÚT TRÒN TẠI ĐÂY NHÉ!
+local VITRI_BANDAU = UDim2.new(0.95, 0, -2, 0) -- 🌟 ÔNG THAY ĐỔI TỌA ĐỘ NÚT TRÒN TẠI ĐÂY NHÉ!
 
 -- ========================================================
 
