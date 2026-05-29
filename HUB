@@ -1,10 +1,17 @@
+
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/bacbeonew/library_test/refs/heads/main/libra"))()
-local x = library:CreateWindow("BacBeo DASHBOARD") -- Tạo menu chính
 
-local b = x:CreateFolder("Thông Tin Game") -- Tạo nhóm nút
 
-b:CreateButton("Copy PlaceId (Game ID)", function()
+local x = library:CreateWindow("BacBeo DASHBOARD") 
+
+local b = x:CreateFolder("Thông Tin Game") 
+
+b:Button("Copy PlaceId (Game ID)", function()
     local placeId = game.PlaceId
-    setclipboard(tostring(placeId)) -- Bấm nút là tự copy số 18519254033
+    setclipboard(tostring(placeId)) -- Bấm nút là tự động copy ID game vào bộ nhớ tạm
     print("Đã copy PlaceId: " .. placeId)
 end)
+
+
+
+--bạn nào không có library thì dùng cái này làm mẫu tham khảo nhé
