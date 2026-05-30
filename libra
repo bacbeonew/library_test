@@ -576,6 +576,49 @@ function Library:CreateWindow(hubName)
 
     local windowMethods = {}
 
+
+
+
+-- Thêm hàm này vào trong itemMethods của Library
+function itemMethods:Avatar(userId)
+    local imgFrame = Instance.new("Frame", featureFrame)
+    imgFrame.Size = UDim2.new(1, -5, 0, 60)
+    imgFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Instance.new("UICorner", imgFrame).CornerRadius = UDim.new(0, 5)
+
+    local img = Instance.new("ImageLabel", imgFrame)
+    img.Size = UDim2.new(0, 50, 0, 50)
+    img.Position = UDim2.new(0, 5, 0, 5)
+    img.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    img.Image = game:GetService("Players"):GetUserThumbnailAsync(userId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size420x420)
+    Instance.new("UICorner", img).CornerRadius = UDim.new(0, 5)
+    
+    local lbl = Instance.new("TextLabel", imgFrame)
+    lbl.Size = UDim2.new(1, -60, 1, 0)
+    lbl.Position = UDim2.new(0, 60, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = "User: " .. game:GetService("Players"):GetNameFromUserIdAsync(userId)
+    lbl.TextColor3 = Color3.new(1, 1, 1)
+    lbl.Font = Enum.Font.SourceSansBold
+    lbl.TextSize = 16
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    
+    return imgFrame
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     function windowMethods:CreateFolder(folderName)
 
         local folderBtn = Instance.new("TextButton", leftContainer)
