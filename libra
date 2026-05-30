@@ -8,844 +8,787 @@ local Library = {}
 
 function Library:CreateWindow(hubName)
 
-   
+   
 
-    if not game:IsLoaded() then
+    if not game:IsLoaded() then
 
-        game.Loaded:Wait()
+        game.Loaded:Wait()
 
-    end
+    end
 
 
 
-    local CoreGui = game:GetService("CoreGui")
+    local CoreGui = game:GetService("CoreGui")
 
-    local UserInputService = game:GetService("UserInputService")
+    local UserInputService = game:GetService("UserInputService")
 
-    local TweenService = game:GetService("TweenService")
+    local TweenService = game:GetService("TweenService")
 
-    local RunService = game:GetService("RunService")
+    local RunService = game:GetService("RunService")
 
-    local Players = game:GetService("Players")
+    local Players = game:GetService("Players")
 
-    
+    
 
-    local localPlayer = Players.LocalPlayer
+    local localPlayer = Players.LocalPlayer
 
-    if not localPlayer then
+    if not localPlayer then
 
-        Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+        Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 
-        localPlayer = Players.LocalPlayer
+        localPlayer = Players.LocalPlayer
 
-    end
+    end
 
 
 
 
 
-    local TargetParent = CoreGui
+    local TargetParent = CoreGui
 
-    local status, err = pcall(function()
+    local status, err = pcall(function()
 
-        local test = Instance.new("Folder")
+        local test = Instance.new("Folder")
 
-        test.Parent = CoreGui
+        test.Parent = CoreGui
 
-        test:Destroy()
+        test:Destroy()
 
-    end)
+    end)
 
-    if not status then
+    if not status then
 
-        TargetParent = localPlayer:WaitForChild("PlayerGui")
+        TargetParent = localPlayer:WaitForChild("PlayerGui")
 
-    end
+    end
 
 
 
 
-    local GuiName = "BacBeoHub_Official_UI"
+    local GuiName = "BacBeoHub_Official_UI"
 
-    for _, child in pairs(CoreGui:GetChildren()) do
+    for _, child in pairs(CoreGui:GetChildren()) do
 
-        if child.Name == GuiName or string.find(child.Name, "BacBeoHub") then
+        if child.Name == GuiName or string.find(child.Name, "BacBeoHub") then
 
-            pcall(function() child:Destroy() end)
+            pcall(function() child:Destroy() end)
 
-        end
+        end
 
-    end
+    end
 
-    for _, child in pairs(localPlayer:WaitForChild("PlayerGui"):GetChildren()) do
+    for _, child in pairs(localPlayer:WaitForChild("PlayerGui"):GetChildren()) do
 
-        if child.Name == GuiName or string.find(child.Name, "BacBeoHub") then
+        if child.Name == GuiName or string.find(child.Name, "BacBeoHub") then
 
-            pcall(function() child:Destroy() end)
+            pcall(function() child:Destroy() end)
 
-        end
+        end
 
-    end
+    end
 
 
 
 
 
-    local ScreenGui = Instance.new("ScreenGui")
+    local ScreenGui = Instance.new("ScreenGui")
 
-    ScreenGui.Name = GuiName
+    ScreenGui.Name = GuiName
 
-    ScreenGui.ResetOnSpawn = false
+    ScreenGui.ResetOnSpawn = false
 
-    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    ScreenGui.DisplayOrder = 999999 -- Ép hiện lên trên cùng tất cả các UI khác của game
+    ScreenGui.DisplayOrder = 999999 -- Ép hiện lên trên cùng tất cả các UI khác của game
 
-    ScreenGui.Parent = TargetParent
+    ScreenGui.Parent = TargetParent
 
 
 
 
 
-    local MainFrame = Instance.new("Frame")
+    local MainFrame = Instance.new("Frame")
 
-    MainFrame.Name = "Main"
+    MainFrame.Name = "Main"
 
-    MainFrame.Size = UDim2.new(0, 550, 0, 380)
+    MainFrame.Size = UDim2.new(0, 550, 0, 380)
 
-    MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
+    MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
 
-    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 
-    MainFrame.BorderSizePixel = 0
+    MainFrame.BorderSizePixel = 0
 
-    MainFrame.ClipsDescendants = true 
+    MainFrame.ClipsDescendants = true 
 
-    MainFrame.Active = true
+    MainFrame.Active = true
 
-    MainFrame.Visible = true 
+    MainFrame.Visible = true 
 
-    MainFrame.ZIndex = 10
+    MainFrame.ZIndex = 10
 
-    MainFrame.Parent = ScreenGui
+    MainFrame.Parent = ScreenGui
 
 
 
-    local corner = Instance.new("UICorner", MainFrame)
+    local corner = Instance.new("UICorner", MainFrame)
 
-    corner.CornerRadius = UDim.new(0, 10)
+    corner.CornerRadius = UDim.new(0, 10)
 
 
 
-    local UIStroke = Instance.new("UIStroke", MainFrame)
+    local UIStroke = Instance.new("UIStroke", MainFrame)
 
-    UIStroke.Color = Color3.fromRGB(0, 255, 100)
+    UIStroke.Color = Color3.fromRGB(0, 255, 100)
 
-    UIStroke.Thickness = 1.5
+    UIStroke.Thickness = 1.5
 
-    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 
 
 
-    local TopBar = Instance.new("Frame", MainFrame)
+    local TopBar = Instance.new("Frame", MainFrame)
 
-    TopBar.Name = "TopBar"
+    TopBar.Name = "TopBar"
 
-    TopBar.Size = UDim2.new(1, 0, 0, 50)
+    TopBar.Size = UDim2.new(1, 0, 0, 50)
 
-    TopBar.BackgroundTransparency = 1
+    TopBar.BackgroundTransparency = 1
 
 
 
-    local title = Instance.new("TextLabel", TopBar)
+    local title = Instance.new("TextLabel", TopBar)
 
-    title.Size = UDim2.new(0, 250, 1, 0)
+    title.Size = UDim2.new(0, 250, 1, 0)
 
-    title.Position = UDim2.new(0, 20, 0, 0)
+    title.Position = UDim2.new(0, 20, 0, 0)
 
-    title.BackgroundTransparency = 1
+    title.BackgroundTransparency = 1
 
-    title.Text = hubName
+    title.Text = hubName
 
-    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
 
-    title.TextSize = 22
+    title.TextSize = 22
 
-    title.Font = Enum.Font.GothamBold
+    title.Font = Enum.Font.GothamBold
 
-    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.TextXAlignment = Enum.TextXAlignment.Left
 
 
 
-    local ToggleBtn = Instance.new("TextButton", TopBar)
+    local ToggleBtn = Instance.new("TextButton", TopBar)
 
-    ToggleBtn.Name = "ToggleBtn"
+    ToggleBtn.Name = "ToggleBtn"
 
-    ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
+    ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
 
-    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) 
+    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) 
 
-    ToggleBtn.BackgroundTransparency = 1
+    ToggleBtn.BackgroundTransparency = 1
 
-    ToggleBtn.Text = "▼"
+    ToggleBtn.Text = "▼"
 
-    ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+    ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
 
-    ToggleBtn.TextSize = 20
+    ToggleBtn.TextSize = 20
 
-    ToggleBtn.Font = Enum.Font.SourceSansBold
+    ToggleBtn.Font = Enum.Font.SourceSansBold
 
 
 
-    -- Khung chứa Folder danh mục
+    -- Khung chứa Folder danh mục
 
-    local leftContainer = Instance.new("Frame", MainFrame)
+    local leftContainer = Instance.new("Frame", MainFrame)
 
-    leftContainer.Name = "LeftContainer"
+    leftContainer.Name = "LeftContainer"
 
-    leftContainer.Size = UDim2.new(0, 150, 1, -65)
+    leftContainer.Size = UDim2.new(0, 150, 1, -65)
 
-    leftContainer.Position = UDim2.new(0, 10, 0, 55)
+    leftContainer.Position = UDim2.new(0, 10, 0, 55)
 
-    leftContainer.BackgroundTransparency = 1
+    leftContainer.BackgroundTransparency = 1
 
 
 
-    local leftLayout = Instance.new("UIListLayout", leftContainer)
+    local leftLayout = Instance.new("UIListLayout", leftContainer)
 
-    leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    leftLayout.Padding = UDim.new(0, 8)
+    leftLayout.Padding = UDim.new(0, 8)
 
 
 
-    local rightContainer = Instance.new("ScrollingFrame", MainFrame)
+    local rightContainer = Instance.new("ScrollingFrame", MainFrame)
 
-    rightContainer.Name = "RightContainer"
+    rightContainer.Name = "RightContainer"
 
-    rightContainer.Size = UDim2.new(1, -180, 1, -65)
+    rightContainer.Size = UDim2.new(1, -180, 1, -65)
 
-    rightContainer.Position = UDim2.new(0, 170, 0, 55)
+    rightContainer.Position = UDim2.new(0, 170, 0, 55)
 
-    rightContainer.BackgroundTransparency = 1
+    rightContainer.BackgroundTransparency = 1
 
-    rightContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    rightContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
 
-    rightContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    rightContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
 
-    rightContainer.ScrollBarThickness = 3
+    rightContainer.ScrollBarThickness = 3
 
-    rightContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
+    rightContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
 
 
 
-    local rightLayout = Instance.new("UIListLayout", rightContainer)
+    local rightLayout = Instance.new("UIListLayout", rightContainer)
 
-    rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-    rightLayout.Padding = UDim.new(0, 8)
+    rightLayout.Padding = UDim.new(0, 8)
 
 
 
-    local IsCollapsed = false
+    local IsCollapsed = false
 
-    local OriginalSize = UDim2.new(0, 550, 0, 380)
+    local OriginalSize = UDim2.new(0, 550, 0, 380)
 
-    local CollapsedSize = UDim2.new(0, 550, 0, 50) 
+    local CollapsedSize = UDim2.new(0, 550, 0, 50) 
 
 
 
-    ToggleBtn.MouseButton1Click:Connect(function()
+    ToggleBtn.MouseButton1Click:Connect(function()
 
-        IsCollapsed = not IsCollapsed
+        IsCollapsed = not IsCollapsed
 
-        if IsCollapsed then
+        if IsCollapsed then
 
-            ToggleBtn.Text = "▲"
+            ToggleBtn.Text = "▲"
 
-            leftContainer.Visible = false
+            leftContainer.Visible = false
 
-            rightContainer.Visible = false
+            rightContainer.Visible = false
 
-            TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
+            TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
 
-        else
+        else
 
-            ToggleBtn.Text = "▼"
+            ToggleBtn.Text = "▼"
 
-            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
 
-            tween:Play()
+            tween:Play()
 
-            tween.Completed:Connect(function()
+            tween.Completed:Connect(function()
 
-                if not IsCollapsed then
+                if not IsCollapsed then
 
-                    leftContainer.Visible = true
+                    leftContainer.Visible = true
 
-                    rightContainer.Visible = true
+                    rightContainer.Visible = true
 
-                end
+                end
 
-            end)
+            end)
 
-        end
+        end
 
-    end)
+    end)
 
 
 
-    
+    
 
-    local dragging = false
+    local dragging = false
 
-    local dragInput, dragStart, startPos
+    local dragInput, dragStart, startPos
 
 
 
-    local function updateDrag(input)
+    local function updateDrag(input)
 
-        local delta = input.Position - dragStart
+        local delta = input.Position - dragStart
 
-        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
 
-    end
+    end
 
 
 
-    TopBar.InputBegan:Connect(function(input)
+    TopBar.InputBegan:Connect(function(input)
 
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 
-            dragging = true
+            dragging = true
 
-            dragStart = input.Position
+            dragStart = input.Position
 
-            startPos = MainFrame.Position
+            startPos = MainFrame.Position
 
-            input.Changed:Connect(function()
+            input.Changed:Connect(function()
 
-                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
 
-            end)
+            end)
 
-        end
+        end
 
-    end)
+    end)
 
 
 
-    TopBar.InputChanged:Connect(function(input)
+    TopBar.InputChanged:Connect(function(input)
 
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
 
-    end)
+    end)
 
 
 
-    UserInputService.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
 
-        if input == dragInput and dragging then updateDrag(input) end
+        if input == dragInput and dragging then updateDrag(input) end
 
-    end)
+    end)
 
 
 
 
-    local isOpened = true
+    local isOpened = true
 
 
 
-    local MiniLogo = Instance.new("ImageButton")
+    local MiniLogo = Instance.new("ImageButton")
 
-    MiniLogo.Name = "BacBeo_MiniLogo_RGB"
+    MiniLogo.Name = "BacBeo_MiniLogo_RGB"
 
-    MiniLogo.Size = UDim2.new(0, 55, 0, 55)
+    MiniLogo.Size = UDim2.new(0, 55, 0, 55)
 
-    MiniLogo.AnchorPoint = Vector2.new(0, 0.5) 
+    MiniLogo.AnchorPoint = Vector2.new(0, 0.5) 
 
-    MiniLogo.Position = UDim2.new(0.5, -27, 0.16, 0) 
+    MiniLogo.Position = UDim2.new(0.5, -27, 0.16, 0) 
 
-    MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 
-    MiniLogo.Image = "rbxassetid://100698867542221"
+    MiniLogo.Image = "rbxassetid://100698867542221"
 
-    MiniLogo.Visible = false -- Ban đầu ẩn vì MainFrame mở sẵn
+    MiniLogo.Visible = false -- Ban đầu ẩn vì MainFrame mở sẵn
 
-    MiniLogo.ZIndex = 100000
+    MiniLogo.ZIndex = 100000
 
-    MiniLogo.Active = true
+    MiniLogo.Active = true
 
-    MiniLogo.Parent = ScreenGui
+    MiniLogo.Parent = ScreenGui
 
 
 
-    local logoCorner = Instance.new("UICorner", MiniLogo)
+    local logoCorner = Instance.new("UICorner", MiniLogo)
 
-    logoCorner.CornerRadius = UDim.new(1, 0)
+    logoCorner.CornerRadius = UDim.new(1, 0)
 
 
 
-    local stroke = Instance.new("UIStroke", MiniLogo)
+    local stroke = Instance.new("UIStroke", MiniLogo)
 
-    stroke.Thickness = 2.5
+    stroke.Thickness = 2.5
 
-    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 
 
 
-    -- Vòng lặp đổi màu cầu vồng (RGB)
+    -- Vòng lặp đổi màu cầu vồng (RGB)
 
-    local tickCounter = 0
+    local tickCounter = 0
 
-    RunService.RenderStepped:Connect(function(deltaTime)
+    RunService.RenderStepped:Connect(function(deltaTime)
 
-        tickCounter = tickCounter + deltaTime
+        tickCounter = tickCounter + deltaTime
 
-        local hue = (tickCounter * 0.4) % 1
+        local hue = (tickCounter * 0.4) % 1
 
-        stroke.Color = Color3.fromHSV(hue, 1, 1)
+        stroke.Color = Color3.fromHSV(hue, 1, 1)
 
-    end)
+    end)
 
 
 
-    MiniLogo.MouseEnter:Connect(function()
+    MiniLogo.MouseEnter:Connect(function()
 
-        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
 
-    end)
+    end)
 
-    MiniLogo.MouseLeave:Connect(function()
+    MiniLogo.MouseLeave:Connect(function()
 
-        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
 
-    end)
+    end)
 
 
 
-    local function ToggleMainUI(state)
+    local function ToggleMainUI(state)
 
-        isOpened = state
+        isOpened = state
 
-        MainFrame.Visible = isOpened
+        MainFrame.Visible = isOpened
 
-        MiniLogo.Visible = not isOpened
+        MiniLogo.Visible = not isOpened
 
-    end
+    end
 
 
 
 
-    local logoDragging = false
+    local logoDragging = false
 
-    local logoDragStart, logoStartPos
+    local logoDragStart, logoStartPos
 
-    local mouseStartPos = Vector3.new(0, 0, 0)
+    local mouseStartPos = Vector3.new(0, 0, 0)
 
 
 
-    MiniLogo.InputBegan:Connect(function(input)
+    MiniLogo.InputBegan:Connect(function(input)
 
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 
-            logoDragging = true
+            logoDragging = true
 
-            logoDragStart = input.Position
+            logoDragStart = input.Position
 
-            logoStartPos = MiniLogo.Position
+            logoStartPos = MiniLogo.Position
 
-            mouseStartPos = input.Position
+            mouseStartPos = input.Position
 
 
 
-            input.Changed:Connect(function()
+            input.Changed:Connect(function()
 
-                if input.UserInputState == Enum.UserInputState.End then logoDragging = false end
+                if input.UserInputState == Enum.UserInputState.End then logoDragging = false end
 
-            end)
+            end)
 
-        end
+        end
 
-    end)
+    end)
 
 
 
-    UserInputService.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
 
-        if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
 
-            local delta = input.Position - logoDragStart
+            local delta = input.Position - logoDragStart
 
-            MiniLogo.AnchorPoint = Vector2.new(0, 0) 
+            MiniLogo.AnchorPoint = Vector2.new(0, 0) 
 
-            MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
+            MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
 
-        end
+        end
 
-    end)
+    end)
 
 
 
-     MiniLogo.InputEnded:Connect(function(input)
+     MiniLogo.InputEnded:Connect(function(input)
 
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
 
-            logoDragging = false
+            logoDragging = false
 
-            local mouseDelta = (input.Position - mouseStartPos).Magnitude
+            local mouseDelta = (input.Position - mouseStartPos).Magnitude
 
-            if mouseDelta <= 5 then
+            if mouseDelta <= 5 then
 
-                ToggleMainUI(true) 
+                ToggleMainUI(true) 
 
-            end
+            end
 
-        end
+        end
 
-    end)
+    end)
 
 
 
 
 
-    local keySequence = {}
+    local keySequence = {}
 
-    local targetSequence = {"H", "U", "B"}
+    local targetSequence = {"H", "U", "B"}
 
-    local lastKeyTime = 0
+    local lastKeyTime = 0
 
 
 
-    UserInputService.InputBegan:Connect(function(input, gpe)
+    UserInputService.InputBegan:Connect(function(input, gpe)
 
-        if gpe then return end 
+        if gpe then return end 
 
-        
+        
 
-        -- Khóa phím tắt nếu nút tròn đang hiện
+        -- Khóa phím tắt nếu nút tròn đang hiện
 
-        if MiniLogo.Visible == true then 
+        if MiniLogo.Visible == true then 
 
-            return 
+            return 
 
-        end
+        end
 
 
 
-        if input.UserInputType == Enum.UserInputType.Keyboard then
+        if input.UserInputType == Enum.UserInputType.Keyboard then
 
-            local keyName = input.KeyCode.Name
+            local keyName = input.KeyCode.Name
 
-            local currentTime = tick()
+            local currentTime = tick()
 
-            
+            
 
-            if currentTime - lastKeyTime > 1.0 then keySequence = {} end
+            if currentTime - lastKeyTime > 1.0 then keySequence = {} end
 
-            lastKeyTime = currentTime
+            lastKeyTime = currentTime
 
-            
+            
 
-            table.insert(keySequence, keyName)
+            table.insert(keySequence, keyName)
 
-            if #keySequence > 3 then table.remove(keySequence, 1) end
+            if #keySequence > 3 then table.remove(keySequence, 1) end
 
-            
+            
 
-            if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
+            if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
 
-                ToggleMainUI(not isOpened)
+                ToggleMainUI(not isOpened)
 
-                keySequence = {}
+                keySequence = {}
 
-            end
+            end
 
-        end
+        end
 
-    end)
+    end)
 
 
 
-    local isFirstFolder = true
+    local isFirstFolder = true
 
 
 
-    -- LOGIC TẠO DANH MỤC VÀ TÍNH NĂNG CON
+    -- LOGIC TẠO DANH MỤC VÀ TÍNH NĂNG CON
 
-    local windowMethods = {}
+    local windowMethods = {}
 
-    function windowMethods:CreateFolder(folderName)
+    function windowMethods:CreateFolder(folderName)
 
-        local folderBtn = Instance.new("TextButton", leftContainer)
+        local folderBtn = Instance.new("TextButton", leftContainer)
 
-        folderBtn.Size = UDim2.new(1, 0, 0, 36)
+        folderBtn.Size = UDim2.new(1, 0, 0, 36)
 
-        folderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        folderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 
-        folderBtn.Text = "  " .. folderName
+        folderBtn.Text = "  " .. folderName
 
-        folderBtn.TextColor3 = Color3.fromRGB(160, 160, 160)
+        folderBtn.TextColor3 = Color3.fromRGB(160, 160, 160)
 
-        folderBtn.TextSize = 14
+        folderBtn.TextSize = 14
 
-        folderBtn.Font = Enum.Font.SourceSansBold
+        folderBtn.Font = Enum.Font.SourceSansBold
 
-        folderBtn.TextXAlignment = Enum.TextXAlignment.Left
+        folderBtn.TextXAlignment = Enum.TextXAlignment.Left
 
 
 
-        local btnCorner = Instance.new("UICorner", folderBtn)
+        local btnCorner = Instance.new("UICorner", folderBtn)
 
-        btnCorner.CornerRadius = UDim.new(0, 6)
+        btnCorner.CornerRadius = UDim.new(0, 6)
 
 
 
-        local featureFrame = Instance.new("Frame", rightContainer)
+        local featureFrame = Instance.new("Frame", rightContainer)
 
-        featureFrame.Size = UDim2.new(1, 0, 0, 0)
+        featureFrame.Size = UDim2.new(1, 0, 0, 0)
 
-        featureFrame.AutomaticSize = Enum.AutomaticSize.Y
+        featureFrame.AutomaticSize = Enum.AutomaticSize.Y
 
-        featureFrame.BackgroundTransparency = 1
+        featureFrame.BackgroundTransparency = 1
 
-        featureFrame.Visible = isFirstFolder
+        featureFrame.Visible = isFirstFolder
 
 
 
-        local featureLayout = Instance.new("UIListLayout", featureFrame)
+        local featureLayout = Instance.new("UIListLayout", featureFrame)
 
-        featureLayout.SortOrder = Enum.SortOrder.LayoutOrder
+        featureLayout.SortOrder = Enum.SortOrder.LayoutOrder
 
-        featureLayout.Padding = UDim.new(0, 6)
+        featureLayout.Padding = UDim.new(0, 6)
 
 
 
-        if isFirstFolder then
+        if isFirstFolder then
 
-            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
 
-            isFirstFolder = false
+            isFirstFolder = false
 
-        end
+        end
 
 
 
-        folderBtn.MouseButton1Click:Connect(function()
+        folderBtn.MouseButton1Click:Connect(function()
 
-            for _, f in pairs(rightContainer:GetChildren()) do
+            for _, f in pairs(rightContainer:GetChildren()) do
 
-                if f:IsA("Frame") then f.Visible = false end
+                if f:IsA("Frame") then f.Visible = false end
 
-            end
+            end
 
-            for _, b in pairs(leftContainer:GetChildren()) do
+            for _, b in pairs(leftContainer:GetChildren()) do
 
-                if b:IsA("TextButton") then b.TextColor3 = Color3.fromRGB(160, 160, 160) end
+                if b:IsA("TextButton") then b.TextColor3 = Color3.fromRGB(160, 160, 160) end
 
-            end
+            end
 
-            featureFrame.Visible = true
+            featureFrame.Visible = true
 
-            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
 
-        end)
+        end)
 
 
 
-        local itemMethods = {}
+       local itemMethods = {}
 
+function itemMethods:Label(text)
+    local lbl = Instance.new("TextLabel", featureFrame)
+    lbl.Size = UDim2.new(1, -5, 0, 30)
+    lbl.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.SourceSansSemibold
+    lbl.TextSize = 14
+    Instance.new("UICorner", lbl).CornerRadius = UDim.new(0, 5)
+    return lbl
+end
 
+function itemMethods:Button(text, callback)
+    local btn = Instance.new("TextButton", featureFrame)
 
-        function itemMethods:Button(text, callback)
+    btn.Size = UDim2.new(1, -5, 0, 34)
+    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    btn.Text = text
+    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+    btn.Font = Enum.Font.SourceSansSemibold
+    btn.TextSize = 15
 
-            local btn = Instance.new("TextButton", featureFrame)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
 
-            btn.Size = UDim2.new(1, -5, 0, 34)
+    btn.MouseButton1Click:Connect(function()
+        if callback then
+            callback()
+        end
+    end)
 
-            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    return btn
+end
 
-            btn.Text = text
+function itemMethods:Toggle(text, callback)
+    local state = false
 
-            btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+    local tFrame = Instance.new("Frame", featureFrame)
+    tFrame.Size = UDim2.new(1, -5, 0, 36)
+    tFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
 
-            btn.Font = Enum.Font.SourceSansSemibold
+    Instance.new("UICorner", tFrame).CornerRadius = UDim.new(0, 5)
 
-            btn.TextSize = 15
+    local lbl = Instance.new("TextLabel", tFrame)
+    lbl.Size = UDim2.new(1, -60, 1, 0)
+    lbl.Position = UDim2.new(0, 10, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+    lbl.Font = Enum.Font.SourceSans
+    lbl.TextSize = 15
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
 
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
+    local btn = Instance.new("TextButton", tFrame)
+    btn.Size = UDim2.new(0, 40, 0, 22)
+    btn.Position = UDim2.new(1, -50, 0.5, -11)
+    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+    btn.Text = ""
 
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 11)
 
+    local circle = Instance.new("Frame", btn)
+    circle.Size = UDim2.new(0, 16, 0, 16)
+    circle.Position = UDim2.new(0, 3, 0.5, -8)
+    circle.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
 
-            btn.MouseButton1Click:Connect(callback)
+    Instance.new("UICorner", circle).CornerRadius = UDim.new(0, 8)
 
-            return btn
+    btn.MouseButton1Click:Connect(function()
+        state = not state
 
-        end
+        if state then
+            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
+            circle.Position = UDim2.new(1, -19, 0.5, -8)
+        else
+            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+            circle.Position = UDim2.new(0, 3, 0.5, -8)
+        end
 
+        if callback then
+            callback(state)
+        end
+    end)
+end
 
+function itemMethods:Box(text, datatype, callback)
+    local bFrame = Instance.new("Frame", featureFrame)
 
-        function itemMethods:Toggle(text, callback)
+    bFrame.Size = UDim2.new(1, -5, 0, 36)
+    bFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
 
-            local state = false
+    Instance.new("UICorner", bFrame).CornerRadius = UDim.new(0, 5)
 
-            local tFrame = Instance.new("Frame", featureFrame)
+    local lbl = Instance.new("TextLabel", bFrame)
+    lbl.Size = UDim2.new(1, -100, 1, 0)
+    lbl.Position = UDim2.new(0, 10, 0, 0)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+    lbl.Font = Enum.Font.SourceSans
+    lbl.TextSize = 15
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
 
-            tFrame.Size = UDim2.new(1, -5, 0, 36)
+    local box = Instance.new("TextBox", bFrame)
+    box.Size = UDim2.new(0, 80, 0, 24)
+    box.Position = UDim2.new(1, -90, 0.5, -12)
+    box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    box.Text = ""
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    box.Font = Enum.Font.SourceSans
+    box.TextSize = 14
 
-            tFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
 
-            Instance.new("UICorner", tFrame).CornerRadius = UDim.new(0, 5)
+    box.FocusLost:Connect(function()
+        local val = box.Text
 
+        if datatype == "number" then
+            val = tonumber(val) or 0
+        end
 
+        if callback then
+            callback(val)
+        end
+    end)
+end
 
-            local lbl = Instance.new("TextLabel", tFrame)
+return itemMethods
 
-            lbl.Size = UDim2.new(1, -60, 1, 0)
+    end
 
-            lbl.Position = UDim2.new(0, 10, 0, 0)
-
-            lbl.BackgroundTransparency = 1
-
-            lbl.Text = text
-
-            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
-
-            lbl.Font = Enum.Font.SourceSans
-
-            lbl.TextSize = 15
-
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-
-
-            local btn = Instance.new("TextButton", tFrame)
-
-            btn.Size = UDim2.new(0, 40, 0, 22)
-
-            btn.Position = UDim2.new(1, -50, 0.5, -11)
-
-            btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-
-            btn.Text = ""
-
-            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 11)
-
-
-
-            local circle = Instance.new("Frame", btn)
-
-            circle.Size = UDim2.new(0, 16, 0, 16)
-
-            circle.Position = UDim2.new(0, 3, 0.5, -8)
-
-            circle.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-
-            Instance.new("UICorner", circle).CornerRadius = UDim.new(0, 8)
-
-
-
-            btn.MouseButton1Click:Connect(function()
-
-                state = not state
-
-                if state then
-
-                    btn.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
-
-                    circle.Position = UDim2.new(1, -19, 0.5, -8)
-
-                else
-
-                    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-
-                    circle.Position = UDim2.new(0, 3, 0.5, -8)
-
-                end
-
-                callback(state)
-
-            end)
-
-        end
-
-
-
-        function itemMethods:Box(text, datatype, callback)
-
-            local bFrame = Instance.new("Frame", featureFrame)
-
-            bFrame.Size = UDim2.new(1, -5, 0, 36)
-
-            bFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-
-            Instance.new("UICorner", bFrame).CornerRadius = UDim.new(0, 5)
-
-
-
-            local lbl = Instance.new("TextLabel", bFrame)
-
-            lbl.Size = UDim2.new(1, -100, 1, 0)
-
-            lbl.Position = UDim2.new(0, 10, 0, 0)
-
-            lbl.BackgroundTransparency = 1
-
-            lbl.Text = text
-
-            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
-
-            lbl.Font = Enum.Font.SourceSans
-
-            lbl.TextSize = 15
-
-            lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-
-
-            local box = Instance.new("TextBox", bFrame)
-
-            box.Size = UDim2.new(0, 80, 0, 24)
-
-            box.Position = UDim2.new(1, -90, 0.5, -12)
-
-            box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-
-            box.Text = ""
-
-            box.TextColor3 = Color3.fromRGB(255, 255, 255)
-
-            box.Font = Enum.Font.SourceSans
-
-            box.TextSize = 14
-
-            Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
-
-
-
-            box.FocusLost:Connect(function()
-
-                local val = box.Text
-
-                if datatype == "number" then val = tonumber(val) or 0 end
-
-                callback(val)
-
-            end)
-
-        end
-
-
-
-        return itemMethods
-
-    end
-
-    return windowMethods
+    return windowMethods
 
 end
 
-
-
 return Library
+
