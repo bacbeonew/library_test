@@ -1397,135 +1397,118 @@ function Library:CreateWindow(hubName)
 
 
 
-local itemMethods = {}
+    local itemMethods = {}
 
-function itemMethods:Label(text)
-    local lbl = Instance.new("TextLabel", featureFrame)
-    lbl.Size = UDim2.new(1, -5, 0, 30)
-    lbl.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    lbl.Text = text
-    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    lbl.Font = Enum.Font.SourceSansSemibold
-    lbl.TextSize = 14
-    Instance.new("UICorner", lbl).CornerRadius = UDim.new(0, 5)
-    return lbl
-end
-
-function itemMethods:Button(text, callback)
-    local btn = Instance.new("TextButton", featureFrame)
-
-    btn.Size = UDim2.new(1, -5, 0, 34)
-    btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(240, 240, 240)
-    btn.Font = Enum.Font.SourceSansSemibold
-    btn.TextSize = 15
-
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
-
-    btn.MouseButton1Click:Connect(function()
-        if callback then
-            callback()
+        -- Hàm Label mới thêm để làm bảng thống kê
+        function itemMethods:Label(text)
+            local lbl = Instance.new("TextLabel", featureFrame)
+            lbl.Size = UDim2.new(1, -5, 0, 30)
+            lbl.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+            lbl.Text = text
+            lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+            lbl.Font = Enum.Font.SourceSansSemibold
+            lbl.TextSize = 14
+            Instance.new("UICorner", lbl).CornerRadius = UDim.new(0, 5)
+            return lbl
         end
-    end)
 
-    return btn
-end
+        function itemMethods:Button(text, callback)
+            local btn = Instance.new("TextButton", featureFrame)
+            btn.Size = UDim2.new(1, -5, 0, 34)
+            btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            btn.Text = text
+            btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+            btn.Font = Enum.Font.SourceSansSemibold
+            btn.TextSize = 15
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 5)
 
-function itemMethods:Toggle(text, callback)
-    local state = false
+            btn.MouseButton1Click:Connect(callback)
+            return btn
+        end
 
-    local tFrame = Instance.new("Frame", featureFrame)
-    tFrame.Size = UDim2.new(1, -5, 0, 36)
-    tFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        function itemMethods:Toggle(text, callback)
+            local state = false
+            local tFrame = Instance.new("Frame", featureFrame)
+            tFrame.Size = UDim2.new(1, -5, 0, 36)
+            tFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+            Instance.new("UICorner", tFrame).CornerRadius = UDim.new(0, 5)
 
-    Instance.new("UICorner", tFrame).CornerRadius = UDim.new(0, 5)
+            local lbl = Instance.new("TextLabel", tFrame)
+            lbl.Size = UDim2.new(1, -60, 1, 0)
+            lbl.Position = UDim2.new(0, 10, 0, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = text
+            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+            lbl.Font = Enum.Font.SourceSans
+            lbl.TextSize = 15
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
 
-    local lbl = Instance.new("TextLabel", tFrame)
-    lbl.Size = UDim2.new(1, -60, 1, 0)
-    lbl.Position = UDim2.new(0, 10, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = text
-    lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
-    lbl.Font = Enum.Font.SourceSans
-    lbl.TextSize = 15
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    local btn = Instance.new("TextButton", tFrame)
-    btn.Size = UDim2.new(0, 40, 0, 22)
-    btn.Position = UDim2.new(1, -50, 0.5, -11)
-    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
-    btn.Text = ""
-
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 11)
-
-    local circle = Instance.new("Frame", btn)
-    circle.Size = UDim2.new(0, 16, 0, 16)
-    circle.Position = UDim2.new(0, 3, 0.5, -8)
-    circle.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
-
-    Instance.new("UICorner", circle).CornerRadius = UDim.new(0, 8)
-
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-
-        if state then
-            btn.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
-            circle.Position = UDim2.new(1, -19, 0.5, -8)
-        else
+            local btn = Instance.new("TextButton", tFrame)
+            btn.Size = UDim2.new(0, 40, 0, 22)
+            btn.Position = UDim2.new(1, -50, 0.5, -11)
             btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+            btn.Text = ""
+            Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 11)
+
+            local circle = Instance.new("Frame", btn)
+            circle.Size = UDim2.new(0, 16, 0, 16)
             circle.Position = UDim2.new(0, 3, 0.5, -8)
+            circle.BackgroundColor3 = Color3.fromRGB(220, 220, 220)
+            Instance.new("UICorner", circle).CornerRadius = UDim.new(0, 8)
+
+            btn.MouseButton1Click:Connect(function()
+                state = not state
+                if state then
+                    btn.BackgroundColor3 = Color3.fromRGB(0, 200, 80)
+                    circle.Position = UDim2.new(1, -19, 0.5, -8)
+                else
+                    btn.BackgroundColor3 = Color3.fromRGB(55, 55, 55)
+                    circle.Position = UDim2.new(0, 3, 0.5, -8)
+                end
+                callback(state)
+            end)
         end
 
-        if callback then
-            callback(state)
+        function itemMethods:Box(text, datatype, callback)
+            local bFrame = Instance.new("Frame", featureFrame)
+            bFrame.Size = UDim2.new(1, -5, 0, 36)
+            bFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+            Instance.new("UICorner", bFrame).CornerRadius = UDim.new(0, 5)
+
+            local lbl = Instance.new("TextLabel", bFrame)
+            lbl.Size = UDim2.new(1, -100, 1, 0)
+            lbl.Position = UDim2.new(0, 10, 0, 0)
+            lbl.BackgroundTransparency = 1
+            lbl.Text = text
+            lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
+            lbl.Font = Enum.Font.SourceSans
+            lbl.TextSize = 15
+            lbl.TextXAlignment = Enum.TextXAlignment.Left
+
+            local box = Instance.new("TextBox", bFrame)
+            box.Size = UDim2.new(0, 80, 0, 24)
+            box.Position = UDim2.new(1, -90, 0.5, -12)
+            box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            box.Text = ""
+            box.TextColor3 = Color3.fromRGB(255, 255, 255)
+            box.Font = Enum.Font.SourceSans
+            box.TextSize = 14
+            Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
+
+            box.FocusLost:Connect(function()
+                local val = box.Text
+                if datatype == "number" then val = tonumber(val) or 0 end
+                callback(val)
+            end)
         end
-    end)
+
+        return itemMethods
+    end
+    return windowMethods
 end
 
-function itemMethods:Box(text, datatype, callback)
-    local bFrame = Instance.new("Frame", featureFrame)
+return Library
 
-    bFrame.Size = UDim2.new(1, -5, 0, 36)
-    bFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-
-    Instance.new("UICorner", bFrame).CornerRadius = UDim.new(0, 5)
-
-    local lbl = Instance.new("TextLabel", bFrame)
-    lbl.Size = UDim2.new(1, -100, 1, 0)
-    lbl.Position = UDim2.new(0, 10, 0, 0)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = text
-    lbl.TextColor3 = Color3.fromRGB(210, 210, 210)
-    lbl.Font = Enum.Font.SourceSans
-    lbl.TextSize = 15
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    local box = Instance.new("TextBox", bFrame)
-    box.Size = UDim2.new(0, 80, 0, 24)
-    box.Position = UDim2.new(1, -90, 0.5, -12)
-    box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    box.Text = ""
-    box.TextColor3 = Color3.fromRGB(255, 255, 255)
-    box.Font = Enum.Font.SourceSans
-    box.TextSize = 14
-
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 4)
-
-    box.FocusLost:Connect(function()
-        local val = box.Text
-
-        if datatype == "number" then
-            val = tonumber(val) or 0
-        end
-
-        if callback then
-            callback(val)
-        end
-    end)
-end
-
-return itemMethods
 
 
 
