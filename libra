@@ -658,6 +658,26 @@ function Library:CreateWindow(hubName)
 
 
 
+
+      -- Thêm đoạn này vào itemMethods trong Library của bạn
+function itemMethods:Label(text)
+    local lbl = Instance.new("TextLabel", featureFrame)
+    lbl.Size = UDim2.new(1, -5, 0, 30)
+    lbl.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    lbl.Text = text
+    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+    lbl.Font = Enum.Font.SourceSansSemibold
+    lbl.TextSize = 14
+    
+    local corner = Instance.new("UICorner", lbl)
+    corner.CornerRadius = UDim.new(0, 5)
+    
+    return lbl -- Trả về đối tượng lbl để bạn có thể update .Text sau này
+end
+
+
+
+
         function itemMethods:Button(text, callback)
 
             local btn = Instance.new("TextButton", featureFrame)
