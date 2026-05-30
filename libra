@@ -693,6 +693,701 @@ function Library:CreateWindow(hubName)
 
 
 
+        local Library = {}
+
+
+
+-- ========================================================
+
+-- ⚙️ KHU VỰC CẤU HÌNH VỊ TRÍ ĐẦU TIÊN CỦA NÚT TRÒN TRÊN MÀN HÌNH
+
+-- ========================================================
+
+
+
+
+
+-- ========================================================
+
+
+
+function Library:CreateWindow(hubName)
+
+    -- Đợi game tải xong cấu trúc cơ bản
+
+    if not game:IsLoaded() then
+
+        game.Loaded:Wait()
+
+    end
+
+
+
+    local CoreGui = game:GetService("CoreGui")
+
+    local UserInputService = game:GetService("UserInputService")
+
+    local TweenService = game:GetService("TweenService")
+
+    local RunService = game:GetService("RunService")
+
+    local Players = game:GetService("Players")
+
+    
+
+    local localPlayer = Players.LocalPlayer
+
+    if not localPlayer then
+
+        Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+
+        localPlayer = Players.LocalPlayer
+
+    end
+
+
+
+    -- 🎯 TỰ ĐỘNG CHỌN NƠI CHỨA UI (Nếu CoreGui lỗi/bị chặn thì nhảy sang PlayerGui)
+
+    local TargetParent = CoreGui
+
+    local status, err = pcall(function()
+
+        local test = Instance.new("Folder")
+
+        test.Parent = CoreGui
+
+        test:Destroy()
+
+    end)
+
+    if not status then
+
+        TargetParent = localPlayer:WaitForChild("PlayerGui")
+
+    end
+
+
+
+    -- ========================================================
+
+    -- 🧹 QUÉT SẠCH BẢN CŨ TRÊN CẢ CORE_GUI VÀ PLAYER_GUI
+
+    -- ========================================================
+
+    local GuiName = "BacBeoHub_Official_UI"
+
+    for _, child in pairs(CoreGui:GetChildren()) do
+
+        if child.Name == GuiName or string.find(child.Name, "BacBeoHub") then
+
+            pcall(function() child:Destroy() end)
+
+        end
+
+    end
+
+    for _, child in pairs(localPlayer:WaitForChild("PlayerGui"):GetChildren()) do
+
+        if child.Name == GuiName or string.find(child.Name, "BacBeoHub") then
+
+            pcall(function() child:Destroy() end)
+
+        end
+
+    end
+
+
+
+    -- Khởi tạo ScreenGui mới ở vị trí an toàn nhất
+
+    local ScreenGui = Instance.new("ScreenGui")
+
+    ScreenGui.Name = GuiName
+
+    ScreenGui.ResetOnSpawn = false
+
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+    ScreenGui.DisplayOrder = 999999 -- Ép hiện lên trên cùng tất cả các UI khác của game
+
+    ScreenGui.Parent = TargetParent
+
+
+
+    -- ========================================================
+
+    -- 📦 KHU VỰC DỰNG KHUNG MAIN CHÍNH (HIỆN NGAY LẬP TỨC)
+
+    -- ========================================================
+
+    local MainFrame = Instance.new("Frame")
+
+    MainFrame.Name = "Main"
+
+    MainFrame.Size = UDim2.new(0, 550, 0, 380)
+
+    MainFrame.Position = UDim2.new(0.5, -275, 0.5, -190)
+
+    MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+
+    MainFrame.BorderSizePixel = 0
+
+    MainFrame.ClipsDescendants = true 
+
+    MainFrame.Active = true
+
+    MainFrame.Visible = true 
+
+    MainFrame.ZIndex = 10
+
+    MainFrame.Parent = ScreenGui
+
+
+
+    local corner = Instance.new("UICorner", MainFrame)
+
+    corner.CornerRadius = UDim.new(0, 10)
+
+
+
+    local UIStroke = Instance.new("UIStroke", MainFrame)
+
+    UIStroke.Color = Color3.fromRGB(0, 255, 100)
+
+    UIStroke.Thickness = 1.5
+
+    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+
+
+    -- Thanh Tiêu đề (TopBar)
+
+    local TopBar = Instance.new("Frame", MainFrame)
+
+    TopBar.Name = "TopBar"
+
+    TopBar.Size = UDim2.new(1, 0, 0, 50)
+
+    TopBar.BackgroundTransparency = 1
+
+
+
+    local title = Instance.new("TextLabel", TopBar)
+
+    title.Size = UDim2.new(0, 250, 1, 0)
+
+    title.Position = UDim2.new(0, 20, 0, 0)
+
+    title.BackgroundTransparency = 1
+
+    title.Text = hubName
+
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+    title.TextSize = 22
+
+    title.Font = Enum.Font.GothamBold
+
+    title.TextXAlignment = Enum.TextXAlignment.Left
+
+
+
+    local ToggleBtn = Instance.new("TextButton", TopBar)
+
+    ToggleBtn.Name = "ToggleBtn"
+
+    ToggleBtn.Size = UDim2.new(0, 35, 0, 35)
+
+    ToggleBtn.Position = UDim2.new(1, -45, 0, 7) 
+
+    ToggleBtn.BackgroundTransparency = 1
+
+    ToggleBtn.Text = "▼"
+
+    ToggleBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+
+    ToggleBtn.TextSize = 20
+
+    ToggleBtn.Font = Enum.Font.SourceSansBold
+
+
+
+    -- Khung chứa Folder danh mục
+
+    local leftContainer = Instance.new("Frame", MainFrame)
+
+    leftContainer.Name = "LeftContainer"
+
+    leftContainer.Size = UDim2.new(0, 150, 1, -65)
+
+    leftContainer.Position = UDim2.new(0, 10, 0, 55)
+
+    leftContainer.BackgroundTransparency = 1
+
+
+
+    local leftLayout = Instance.new("UIListLayout", leftContainer)
+
+    leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    leftLayout.Padding = UDim.new(0, 8)
+
+
+
+    local rightContainer = Instance.new("ScrollingFrame", MainFrame)
+
+    rightContainer.Name = "RightContainer"
+
+    rightContainer.Size = UDim2.new(1, -180, 1, -65)
+
+    rightContainer.Position = UDim2.new(0, 170, 0, 55)
+
+    rightContainer.BackgroundTransparency = 1
+
+    rightContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+    rightContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+    rightContainer.ScrollBarThickness = 3
+
+    rightContainer.ScrollBarImageColor3 = Color3.fromRGB(0, 255, 100)
+
+
+
+    local rightLayout = Instance.new("UIListLayout", rightContainer)
+
+    rightLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    rightLayout.Padding = UDim.new(0, 8)
+
+
+
+    local IsCollapsed = false
+
+    local OriginalSize = UDim2.new(0, 550, 0, 380)
+
+    local CollapsedSize = UDim2.new(0, 550, 0, 50) 
+
+
+
+    ToggleBtn.MouseButton1Click:Connect(function()
+
+        IsCollapsed = not IsCollapsed
+
+        if IsCollapsed then
+
+            ToggleBtn.Text = "▲"
+
+            leftContainer.Visible = false
+
+            rightContainer.Visible = false
+
+            TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = CollapsedSize}):Play()
+
+        else
+
+            ToggleBtn.Text = "▼"
+
+            local tween = TweenService:Create(MainFrame, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = OriginalSize})
+
+            tween:Play()
+
+            tween.Completed:Connect(function()
+
+                if not IsCollapsed then
+
+                    leftContainer.Visible = true
+
+                    rightContainer.Visible = true
+
+                end
+
+            end)
+
+        end
+
+    end)
+
+
+
+    -- Kéo thả MainFrame
+
+    local dragging = false
+
+    local dragInput, dragStart, startPos
+
+
+
+    local function updateDrag(input)
+
+        local delta = input.Position - dragStart
+
+        MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+
+    end
+
+
+
+    TopBar.InputBegan:Connect(function(input)
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+
+            dragging = true
+
+            dragStart = input.Position
+
+            startPos = MainFrame.Position
+
+            input.Changed:Connect(function()
+
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+
+            end)
+
+        end
+
+    end)
+
+
+
+    TopBar.InputChanged:Connect(function(input)
+
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end
+
+    end)
+
+
+
+    UserInputService.InputChanged:Connect(function(input)
+
+        if input == dragInput and dragging then updateDrag(input) end
+
+    end)
+
+
+
+    -- ========================================================
+
+    -- 🔘 NÚT MINI LOGO TRÒN (CAM KẾT KHÔNG CHỮ BB)
+
+    -- ========================================================
+
+    local isOpened = true
+
+
+
+    local MiniLogo = Instance.new("ImageButton")
+
+    MiniLogo.Name = "BacBeo_MiniLogo_RGB"
+
+    MiniLogo.Size = UDim2.new(0, 55, 0, 55)
+
+    MiniLogo.AnchorPoint = Vector2.new(0, 0.5) 
+
+    MiniLogo.Position = UDim2.new(0.5, -27, 0.16, 0) 
+
+    MiniLogo.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+    MiniLogo.Image = "rbxassetid://100698867542221"
+
+    MiniLogo.Visible = false -- Ban đầu ẩn vì MainFrame mở sẵn
+
+    MiniLogo.ZIndex = 100000
+
+    MiniLogo.Active = true
+
+    MiniLogo.Parent = ScreenGui
+
+
+
+    local logoCorner = Instance.new("UICorner", MiniLogo)
+
+    logoCorner.CornerRadius = UDim.new(1, 0)
+
+
+
+    local stroke = Instance.new("UIStroke", MiniLogo)
+
+    stroke.Thickness = 2.5
+
+    stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+
+
+
+    -- Vòng lặp đổi màu cầu vồng (RGB)
+
+    local tickCounter = 0
+
+    RunService.RenderStepped:Connect(function(deltaTime)
+
+        tickCounter = tickCounter + deltaTime
+
+        local hue = (tickCounter * 0.4) % 1
+
+        stroke.Color = Color3.fromHSV(hue, 1, 1)
+
+    end)
+
+
+
+    MiniLogo.MouseEnter:Connect(function()
+
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(45, 45, 45)}):Play()
+
+    end)
+
+    MiniLogo.MouseLeave:Connect(function()
+
+        TweenService:Create(MiniLogo, TweenInfo.new(0.15), {BackgroundColor3 = Color3.fromRGB(30, 30, 30)}):Play()
+
+    end)
+
+
+
+    local function ToggleMainUI(state)
+
+        isOpened = state
+
+        MainFrame.Visible = isOpened
+
+        MiniLogo.Visible = not isOpened
+
+    end
+
+
+
+    -- Kéo thả nút tròn độc lập
+
+    local logoDragging = false
+
+    local logoDragStart, logoStartPos
+
+    local mouseStartPos = Vector3.new(0, 0, 0)
+
+
+
+    MiniLogo.InputBegan:Connect(function(input)
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+
+            logoDragging = true
+
+            logoDragStart = input.Position
+
+            logoStartPos = MiniLogo.Position
+
+            mouseStartPos = input.Position
+
+
+
+            input.Changed:Connect(function()
+
+                if input.UserInputState == Enum.UserInputState.End then logoDragging = false end
+
+            end)
+
+        end
+
+    end)
+
+
+
+    UserInputService.InputChanged:Connect(function(input)
+
+        if logoDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+
+            local delta = input.Position - logoDragStart
+
+            MiniLogo.AnchorPoint = Vector2.new(0, 0) 
+
+            MiniLogo.Position = UDim2.new(logoStartPos.X.Scale, logoStartPos.X.Offset + delta.X, logoStartPos.Y.Scale, logoStartPos.Y.Offset + delta.Y)
+
+        end
+
+    end)
+
+
+
+     MiniLogo.InputEnded:Connect(function(input)
+
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+
+            logoDragging = false
+
+            local mouseDelta = (input.Position - mouseStartPos).Magnitude
+
+            if mouseDelta <= 5 then
+
+                ToggleMainUI(true) 
+
+            end
+
+        end
+
+    end)
+
+
+
+    -- ========================================================
+
+    -- ⌨️ PHÍM TẮT "H-U-B" (KHÓA KHI LOGO TRÒN ĐANG HIỆN)
+
+    -- ========================================================
+
+    local keySequence = {}
+
+    local targetSequence = {"H", "U", "B"}
+
+    local lastKeyTime = 0
+
+
+
+    UserInputService.InputBegan:Connect(function(input, gpe)
+
+        if gpe then return end 
+
+        
+
+        -- Khóa phím tắt nếu nút tròn đang hiện
+
+        if MiniLogo.Visible == true then 
+
+            return 
+
+        end
+
+
+
+        if input.UserInputType == Enum.UserInputType.Keyboard then
+
+            local keyName = input.KeyCode.Name
+
+            local currentTime = tick()
+
+            
+
+            if currentTime - lastKeyTime > 1.0 then keySequence = {} end
+
+            lastKeyTime = currentTime
+
+            
+
+            table.insert(keySequence, keyName)
+
+            if #keySequence > 3 then table.remove(keySequence, 1) end
+
+            
+
+            if keySequence[1] == targetSequence[1] and keySequence[2] == targetSequence[2] and keySequence[3] == targetSequence[3] then
+
+                ToggleMainUI(not isOpened)
+
+                keySequence = {}
+
+            end
+
+        end
+
+    end)
+
+
+
+    local isFirstFolder = true
+
+
+
+    -- LOGIC TẠO DANH MỤC VÀ TÍNH NĂNG CON
+
+    local windowMethods = {}
+
+    function windowMethods:CreateFolder(folderName)
+
+        local folderBtn = Instance.new("TextButton", leftContainer)
+
+        folderBtn.Size = UDim2.new(1, 0, 0, 36)
+
+        folderBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+        folderBtn.Text = "  " .. folderName
+
+        folderBtn.TextColor3 = Color3.fromRGB(160, 160, 160)
+
+        folderBtn.TextSize = 14
+
+        folderBtn.Font = Enum.Font.SourceSansBold
+
+        folderBtn.TextXAlignment = Enum.TextXAlignment.Left
+
+
+
+        local btnCorner = Instance.new("UICorner", folderBtn)
+
+        btnCorner.CornerRadius = UDim.new(0, 6)
+
+
+
+        local featureFrame = Instance.new("Frame", rightContainer)
+
+        featureFrame.Size = UDim2.new(1, 0, 0, 0)
+
+        featureFrame.AutomaticSize = Enum.AutomaticSize.Y
+
+        featureFrame.BackgroundTransparency = 1
+
+        featureFrame.Visible = isFirstFolder
+
+
+
+        local featureLayout = Instance.new("UIListLayout", featureFrame)
+
+        featureLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+        featureLayout.Padding = UDim.new(0, 6)
+
+
+
+        if isFirstFolder then
+
+            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+
+            isFirstFolder = false
+
+        end
+
+
+
+        folderBtn.MouseButton1Click:Connect(function()
+
+            for _, f in pairs(rightContainer:GetChildren()) do
+
+                if f:IsA("Frame") then f.Visible = false end
+
+            end
+
+            for _, b in pairs(leftContainer:GetChildren()) do
+
+                if b:IsA("TextButton") then b.TextColor3 = Color3.fromRGB(160, 160, 160) end
+
+            end
+
+            featureFrame.Visible = true
+
+            folderBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+
+        end)
+
+
+
+ 
+
+
+
+
+
+
+
+
 
 
 
@@ -831,3 +1526,12 @@ function itemMethods:Box(text, datatype, callback)
 end
 
 return itemMethods
+
+
+
+
+
+
+
+
+
